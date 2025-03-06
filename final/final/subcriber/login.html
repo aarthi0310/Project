@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobi-Comm | Login</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .login-container {
+            margin-top: 80px;
+            position: relative;
+        }
+        .left-panel {
+            background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 10px 0 0 10px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .right-panel {
+            background: white;
+            padding: 40px;
+            border-radius: 0 10px 10px 0;
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center; /* Center content horizontally */
+        }
+        .center-panel {
+            background: white;
+            padding: 0;
+            border-radius: 15px;
+            width: 420px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+        .panel-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1a365d 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 15px 15px 0 0;
+        }
+        .panel-body {
+            padding: 30px;
+            position: relative;
+        }
+        .main-title {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        .sub-title {
+            font-size: 24px;
+            margin-top: 20px;
+            opacity: 0.8;
+        }
+        .brand-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .login-btn {
+            background: linear-gradient(90deg, #2563eb, #4b83ff);
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            margin-top: 20px;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+        }
+        .form-control {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+        }
+        .form-control.success {
+            border-color: #28a745;
+            background-color: #e6ffe6;
+            color: #28a745;
+            font-weight: bold;
+            text-align: center;
+            pointer-events: none; /* Disable further input */
+        }
+        .resend-link {
+            text-align: center;
+            margin-top: 15px;
+            color: #2563eb;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        .resend-link:hover {
+            color: #1a365d;
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .input-error {
+            border-color: #e53e3e;
+        }
+        .left-panel > div {
+            width: 100%;
+        }
+        /* OTP Notification in Right Panel */
+        .otp-notification {
+            background: #ffffff;
+            border: 2px solid #2563eb;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 20;
+            display: none;
+            animation: popIn 0.4s ease-out;
+            text-align: center;
+            width: 200px;
+        }
+        .otp-code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+            letter-spacing: 4px;
+            margin: 10px 0;
+        }
+        .otp-timer {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        /* Navbar styles */
+        .navbar {
+            background: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 50;
+        }
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .navbar-nav .nav-link {
+            color: #6c757d;
+            margin-left: 20px;
+        }
+        .navbar-nav .nav-link:hover {
+            color: #2563eb;
+        }
+        /* Right Panel Animations */
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.1);
+            animation: float 6s infinite ease-in-out;
+        }
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            right: 20%;
+            animation-delay: 0s;
+        }
+        .shape:nth-child(2) {
+            width: 50px;
+            height: 50px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            top: 40%;
+            right: 40%;
+            animation-delay: 4s;
+            background: rgba(75, 131, 255, 0.15);
+        }
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translate(-50%, -60%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">Mobi-Comm</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="plans.html">Plans</a></li>
+                    <li class="nav-item"><a class="nav-link" href="recharge.html">Recharge</a></li>
+                    <li class="nav-item"><a class="nav-link" href="support.html">Support</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container login-container pt-5">
+        <div class="row">
+            <!-- Left Panel -->
+            <div class="col-md-6 left-panel">
+                <div>
+                    
+                    <div class="main-title">Login</div>
+                    <div class="sub-title">Access made easy<br>with OTP</div>
+                </div>
+            </div>
+
+            <!-- Right Panel with OTP Display -->
+            <div class="col-md-6 right-panel">
+                <div class="floating-shapes">
+                    <div class="shape"></div>
+                    <div class="shape"></div>
+                    <div class="shape"></div>
+                </div>
+                <div class="otp-notification" id="otpNotification">
+                    <p class="mb-0 text-muted">Your OTP:</p>
+                    <div class="otp-code" id="otpDisplay"></div>
+                    <p class="otp-timer" id="otpTimer">Expires in <span id="timerSeconds">30</span>s</p>
+                </div>
+            </div>
+
+            <!-- Creative Center Panel -->
+            <div class="center-panel">
+                <div class="panel-header">
+                    <h5 class="mb-0">Welcome Back!</h5>
+                    <p class="text-white-75 mt-1" id="header-subtitle">Login with OTP Verification</p>
+                </div>
+                <div class="panel-body">
+                    <!-- Phone Input Form -->
+                    <div id="phoneForm">
+                        <form id="mobileForm">
+                            <div class="mb-3">
+                                <label for="mobile" class="form-label fw-semibold">Mobile Number</label>
+                                <input type="tel" class="form-control" id="mobile" placeholder="Enter 10-digit number">
+                                <p id="mobileError" class="error-message">Please enter a valid 10-digit mobile number.</p>
+                                <p id="notRegisteredError" class="error-message">Please enter the vaild  Mobi-Comm prepaid number  .</p>
+                                <p id="emptyError" class="error-message">Mobile number can’t be empty.</p>
+                            </div>
+                            <button type="submit" class="login-btn">Send OTP</button>
+                        </form>
+                    </div>
+
+                    <!-- OTP Verification Form -->
+                    <div id="otpForm" style="display: none;">
+                        <p class="text-muted mb-4 text-center">Enter the 6-digit OTP from the right panel</p>
+                        <form id="verifyOtpForm">
+                            <div class="mb-3">
+                                <label for="otp" class="form-label fw-semibold">Enter OTP</label>
+                                <input type="text" class="form-control" id="otp" placeholder="6-digit OTP" maxlength="6">
+                                <p id="otpError" class="error-message">Invalid OTP. Try again!</p>
+                            </div>
+                            <button type="submit" class="login-btn">Verify OTP</button>
+                        </form>
+                        <div class="resend-link" id="resendOtp">
+                            <span class="fw-semibold">Resend OTP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Elements
+        const mobileForm = document.getElementById('mobileForm');
+        const verifyOtpForm = document.getElementById('verifyOtpForm');
+        const phoneFormSection = document.getElementById('phoneForm');
+        const otpFormSection = document.getElementById('otpForm');
+        const mobileInput = document.getElementById('mobile');
+        const otpInput = document.getElementById('otp');
+        const mobileError = document.getElementById('mobileError');
+        const notRegisteredError = document.getElementById('notRegisteredError');
+        const emptyError = document.getElementById('emptyError');
+        const otpError = document.getElementById('otpError');
+        const resendOtpButton = document.getElementById('resendOtp');
+        const headerSubtitle = document.getElementById('header-subtitle');
+        const otpNotification = document.getElementById('otpNotification');
+        const otpDisplay = document.getElementById('otpDisplay');
+        const otpTimer = document.getElementById('otpTimer');
+        const timerSeconds = document.getElementById('timerSeconds');
+
+        // Variables
+        let generatedOtp;
+        let userMobileNumber;
+        let timerInterval;
+        const validNumbers = ['9080725935', '8090420042']; // Mobi-Comm valid numbers
+
+        // Function to start OTP timer
+        function startOtpTimer(duration) {
+            let timeLeft = duration;
+            timerSeconds.textContent = timeLeft;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerSeconds.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    otpNotification.style.display = 'none';
+                    generatedOtp = null; // Invalidate OTP
+                    otpError.textContent = 'OTP expired. Please resend!';
+                    otpError.style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        // Function to show OTP in right panel
+        function showOtp(otp) {
+            otpDisplay.textContent = otp;
+            otpNotification.style.display = 'block';
+            startOtpTimer(30); // 30-second timer
+        }
+
+        // Mobile Form Submission
+        mobileForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const mobileNumber = mobileInput.value.trim();
+
+            // Hide all errors
+            mobileError.style.display = 'none';
+            notRegisteredError.style.display = 'none';
+            emptyError.style.display = 'none';
+            mobileInput.classList.remove('input-error');
+
+            // Validation
+            if (mobileNumber === '') {
+                emptyError.style.display = 'block';
+                mobileInput.classList.add('input-error');
+                return;
+            }
+            if (!/^[0-9]{10}$/.test(mobileNumber)) {
+                mobileError.style.display = 'block';
+                mobileInput.classList.add('input-error');
+                return;
+            }
+            if (!validNumbers.includes(mobileNumber)) {
+                notRegisteredError.style.display = 'block';
+                mobileInput.classList.add('input-error');
+                return;
+            }
+
+            // Store mobile number and generate OTP
+            userMobileNumber = mobileNumber;
+            generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            showOtp(generatedOtp);
+
+            // Update header and switch to OTP form
+            headerSubtitle.textContent = `OTP sent to ${mobileNumber}`;
+            phoneFormSection.style.display = 'none';
+            otpFormSection.style.display = 'block';
+        });
+
+        // OTP Verification Form Submission
+        verifyOtpForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const enteredOtp = otpInput.value.trim();
+            otpError.style.display = 'none';
+            otpInput.classList.remove('input-error');
+
+            if (!generatedOtp || enteredOtp !== generatedOtp) {
+                otpError.textContent = !generatedOtp ? 'OTP expired. Please resend!' : 'Invalid OTP. Try again!';
+                otpError.style.display = 'block';
+                otpInput.classList.add('input-error');
+                return;
+            }
+
+            // Store login info
+            localStorage.setItem('userPhone', userMobileNumber);
+            sessionStorage.setItem('phoneNumber', userMobileNumber);
+
+            // Transform OTP input to success message
+            otpInput.value = 'Login Successful! Redirecting...';
+            otpInput.classList.add('success');
+            otpInput.disabled = true;
+            headerSubtitle.textContent = 'Welcome to Mobi-Comm!';
+            otpNotification.style.display = 'none';
+            clearInterval(timerInterval);
+            document.querySelector('.login-btn').style.display = 'none'; // Hide verify button
+            resendOtpButton.style.display = 'none'; // Hide resend link
+
+            setTimeout(() => {
+                window.location.href = "plan1.html";
+            }, 2000);
+        });
+
+        // Resend OTP Functionality
+        resendOtpButton.addEventListener('click', () => {
+            generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            showOtp(generatedOtp);
+
+            const originalText = resendOtpButton.innerHTML;
+            resendOtpButton.innerHTML = 'OTP Sent!';
+            resendOtpButton.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                resendOtpButton.innerHTML = originalText;
+                resendOtpButton.style.pointerEvents = 'auto';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

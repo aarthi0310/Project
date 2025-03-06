@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobi-Comm | Mobile Plans & Packages</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .hero-gradient { 
+            background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%); 
+        }
+
+        .selected-plan { 
+            border-color: #2563eb; 
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5); 
+            background-color: #f0f9ff; 
+        }
+
+        .plan-row:hover { 
+            background-color: #f0f7ff; 
+        }
+
+        .filter-button { 
+            background-color: #ffffff; 
+            color: #1a365d; 
+        }
+
+        .filter-button.active, 
+        .filter-button:hover { 
+            background-color: #2563eb; 
+            color: white; 
+        }
+
+        .hidden { 
+            display: none; 
+        }
+
+        .badge-popular { 
+            background-color: #ef4444; 
+            color: white; 
+        }
+
+        .dropdown-menu { 
+            display: none; 
+            position: absolute; 
+            right: 0; 
+            top: 100%; 
+            background-color: white; 
+            min-width: 160px; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+            border-radius: 0.5rem; 
+            margin-top: 0.5rem; 
+            z-index: 50; 
+        }
+
+        .dropdown-menu.show { 
+            display: block; 
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 640px) { /* Mobile */
+            .filter-button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            .plans-table th, .plans-table td {
+                font-size: 0.875rem;
+                padding: 0.75rem 0.5rem;
+            }
+            .plans-table th:nth-child(3),
+            .plans-table td:nth-child(3) {
+                display: none; /* Hide Data column on mobile */
+            }
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 4rem;
+                left: 0;
+                background-color: white;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            .nav-links.show {
+                display: flex;
+            }
+        }
+/* Mobile Adjustments */
+@media (max-width: 640px) {
+    .plans-table {
+        display: block;
+        overflow-x: auto;
+    }
+    .plans-table th, .plans-table td {
+        white-space: nowrap; /* Prevent text from wrapping */
+    }
+}
+
+/* Tablet Adjustments */
+@media (min-width: 641px) and (max-width: 1023px) {
+    .plans-table th, .plans-table td {
+        font-size: 1rem; /* Slightly larger font for readability */
+    }
+}
+
+/* Desktop Adjustments */
+@media (min-width: 1024px) {
+    .nav-links {
+        display: flex; /* Ensure nav links are displayed in a row */
+    }
+}
+
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+  <!-- Navbar -->
+<nav class="bg-white shadow-lg fixed w-full z-50">
+    <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+        <div class="flex items-center">
+            <a href="/index.html"><span class="text-xl font-bold text-blue-600">Mobi-Comm</span></a>
+        </div>
+        <div class="hidden md:flex items-center space-x-8 nav-links" id="navLinks">
+            <a href="index.html" class="text-gray-600 hover:text-blue-600 transition">Home</a>
+            <a href="plan1.html" class="text-blue-600 font-medium">Plans</a>
+            <a href="recharge.html" class="text-gray-600 hover:text-blue-600 transition">Recharge</a>
+            <a href="support.html" class="text-gray-600 hover:text-blue-600 transition">Support</a>
+            <div class="dropdown relative" id="accountDropdown">
+                <button class="flex items-center text-gray-600 hover:text-blue-600 transition" id="accountDropdownButton">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="profile.html" class="block px-4 py-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors duration-150 flex items-center">
+                        <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Profile
+                    </a>
+                    <a href="index.html" class="block px-4 py-2 text-gray-600 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors duration-150 flex items-center">
+                        <svg class="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-button md:hidden text-gray-600" id="mobileMenuButton">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </div>
+</nav>
+
+<!-- Mobile Menu Links (Hidden by default) -->
+<div class="md:hidden nav-links hidden" id="navLinksMobile">
+    <a href="/index.html" class="block px-4 py-2 text-gray-600 hover:text-blue-600 transition">Home</a>
+    <a href="plan1.html" class="block px-4 py-2 text-gray-600 hover:text-blue-600 transition">Plans</a>
+    <a href="recharge.html" class="block px-4 py-2 text-gray-600 hover:text-blue-600 transition">Recharge</a>
+    <a href="support.html" class="block px-4 py-2 text-gray-600 hover:text-blue-600 transition">Support</a>
+</div>
+
+    <!-- Hero Section -->
+    <div class="hero-gradient pt-28 pb-12 text-center text-white">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Find Your Perfect Plan</h1>
+        <p class="text-base sm:text-lg opacity-90 max-w-2xl mx-auto px-4">Plans That Fit Your Lifestyle and Budget – Choose What's Best for You!</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="max-w-6xl mx-auto px-4 -mt-6">
+        <div class="bg-white rounded-lg shadow-lg p-4 flex flex-wrap justify-center gap-2">
+            <button class="filter-button active px-4 py-2 rounded-md text-sm font-medium transition" data-filter="all">All Plans</button>
+            <button class="filter-button px-4 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 transition" data-filter="popular"><i class="fas fa-fire mr-1"></i> Popular</button>
+            <button class="filter-button px-4 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 transition" data-filter="validity"><i class="fas fa-calendar-alt mr-1"></i> Validity</button>
+            <button class="filter-button px-4 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 transition" data-filter="data"><i class="fas fa-database mr-1"></i> Data</button>
+            <button class="filter-button px-4 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 transition" data-filter="unlimited"><i class="fas fa-infinity mr-1"></i> Unlimited</button>
+            <button class="filter-button px-4 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 transition" data-filter="entertainment"><i class="fas fa-tv mr-1"></i> Entertainment</button>
+            <button class="filter-button px-4 py-2 rounded-md text-sm font-medium bg-gray-100 hover:bg-gray-200 transition" data-filter="international"><i class="fas fa-globe mr-1"></i> International</button>
+        </div>
+    </div>
+
+    <!-- Plans Table Section -->
+    <div class="content max-w-6xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full plans-table">
+                    <thead>
+                        <tr class="bg-blue-50 text-blue-800">
+                            <th class="py-3 px-4 text-left font-medium">Plan Details</th>
+                            <th class="py-3 px-4 text-center font-medium">Price</th>
+                            <th class="py-3 px-4 text-center font-medium">Data</th>
+                            <th class="py-3 px-4 text-center font-medium">Validity</th>
+                            <th class="py-3 px-4 text-center font-medium">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plansTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+    // Load plans from localStorage or use defaults
+    function loadPlansFromStorage() {
+        const storedPlans = JSON.parse(localStorage.getItem('mobi-comm-plans')) || [
+            { id: 1, name: "Monthly Value Pack", price: 199, data: "1.5GB/day", validity: "28", category: "popular", active: true },
+            { id: 2, name: "5G Unlimited Plan", price: 999, data: "Unlimited Data", validity: "30", category: "unlimited", active: true },
+            { id: 3, name: "Long Validity Plan", price: 1499, data: "2GB/day", validity: "365", category: "validity", active: true },
+            { id: 4, name: "Basic Validity Extension", price: 99, data: "100MB total", validity: "90", category: "validity", active: true },
+            { id: 5, name: "Premium Data Pack", price: 251, data: "50GB total", validity: "28", category: "data", active: true },
+            { id: 6, name: "Daily Data Booster", price: 25, data: "1GB/day", validity: "1", category: "data", active: true },
+            { id: 7, name: "Entertainment Plus Pack", price: 599, data: "2GB/day", validity: "28", category: "entertainment", active: true },
+            { id: 8, name: "Global Traveller Pack", price: 2999, data: "5GB/day", validity: "30", category: "international", active: true }
+        ];
+        
+        const tbody = document.getElementById("plansTableBody");
+        tbody.innerHTML = "";
+
+        storedPlans.filter(plan => plan.active).forEach(plan => {
+            const row = document.createElement("tr");
+            row.className = `plan-row border-b plan-${plan.category}`;
+            const isPopular = plan.category === "popular" ? '<span class="ml-2 text-xs px-2 py-1 badge-popular rounded-full">Popular</span>' : "";
+            const description = plan.category === "data" ? (plan.name.includes("Booster") ? "Add-on to existing plans" : "Data only plan, no calls") :
+                               plan.category === "entertainment" ? "Netflix, Prime Video, Disney+ Included" :
+                               plan.category === "international" ? "International Roaming + ISD Calls" :
+                               plan.name.includes("Basic") ? "Limited services, 10 SMS/day" : "Unlimited calls, 100 SMS/day";
+            const badgeStyle = getBadgeStyle(plan.category);
+            const badgeText = getBadgeText(plan.category);
+
+            row.innerHTML = `
+                <td class="py-4 px-4">
+                    <div class="flex items-center"><h3 class="font-medium text-gray-800">${plan.name}</h3>${isPopular}</div>
+                    <p class="text-sm text-gray-600">${description}</p>
+                    <div class="flex items-center mt-1"><span class="text-xs px-2 py-1 ${badgeStyle} rounded-full">${badgeText}</span></div>
+                </td>
+                <td class="py-4 px-4 text-center font-bold text-blue-700">₹${plan.price}</td>
+                <td class="py-4 px-4 text-center">${plan.data}</td>
+                <td class="py-4 px-4 text-center">${plan.validity} days</td>
+                <td class="py-4 px-4 text-center">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-4 rounded-lg text-sm transition" 
+                            onclick="selectPlan('${plan.name}', ${plan.price}, '${plan.data}', '${plan.validity} days')">
+                        Select
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    // Helper functions for badges
+    function getBadgeStyle(category) {
+        switch (category) {
+            case 'popular': return 'bg-green-100 text-green-800';
+            case 'validity': return 'bg-yellow-100 text-yellow-800';
+            case 'data': return 'bg-blue-100 text-blue-800';
+            case 'unlimited': return 'bg-purple-100 text-purple-800';
+            case 'entertainment': return 'bg-pink-100 text-pink-800';
+            case 'international': return 'bg-indigo-100 text-indigo-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    }
+
+    function getBadgeText(category) {
+        switch (category) {
+            case 'popular': return 'Monthly';
+            case 'validity': return 'Annual';
+            case 'data': return 'Data';
+            case 'unlimited': return '5G Exclusive';
+            case 'entertainment': return 'OTT Bundle';
+            case 'international': return 'International';
+            default: return 'Special';
+        }
+    }
+
+    // Select plan and redirect
+    function selectPlan(planName, price, data, validity) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const phoneNumber = urlParams.get('phone') || localStorage.getItem('userPhone');
+        if (!phoneNumber) {
+            window.location.href = `recharge.html?planName=${encodeURIComponent(planName)}&price=${encodeURIComponent(price)}&data=${encodeURIComponent(data)}&validity=${encodeURIComponent(validity)}`;
+        } else {
+            const paymentUrl = `payment.html?phone=${encodeURIComponent(phoneNumber)}&planName=${encodeURIComponent(planName)}&price=${encodeURIComponent(price)}&data=${encodeURIComponent(data)}&validity=${encodeURIComponent(validity)}`;
+            window.location.href = paymentUrl;
+        }
+    }
+
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-button');
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const filter = button.getAttribute('data-filter');
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            const plans = document.querySelectorAll('.plan-row');
+            plans.forEach(plan => {
+                if (filter === 'all' || plan.classList.contains(`plan-${filter}`)) {
+                    plan.classList.remove('hidden');
+                } else {
+                    plan.classList.add('hidden');
+                }
+            });
+        });
+    });
+
+    // DOM Content Loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        loadPlansFromStorage();
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById("mobileMenuButton");
+        const navLinks = document.getElementById("navLinks");
+        mobileMenuButton.addEventListener("click", () => {
+            navLinks.classList.toggle("show");
+        });
+
+        // Account dropdown
+        const accountDropdownButton = document.getElementById("accountDropdownButton");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+        accountDropdownButton.addEventListener("click", function(event) {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+        });
+
+        document.addEventListener("click", function(event) {
+            if (!accountDropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove("show");
+            }
+            if (!mobileMenuButton.contains(event.target) && !navLinks.contains(event.target)) {
+                navLinks.classList.remove("show");
+            }
+        });
+
+        setInterval(loadPlansFromStorage, 5000);
+    });
+    </script>
+</body>
+</html>

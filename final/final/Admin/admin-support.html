@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobi-Comm Support Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .sidebar-nav:hover {
+            background-color:rgb(66, 66, 150);
+            border-radius: 0.5rem;
+        }
+        .card-zoom:hover {
+            transform: scale(1.02);
+            transition: transform 0.2s ease-in-out;
+        }
+        .notification-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            overflow-y: auto;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+        .priority-high {
+            background-color: #FEE2E2;
+            color: #B91C1C;
+            border-left: 4px solid #B91C1C;
+        }
+        .priority-medium {
+            background-color: #FEF3C7;
+            color: #92400E;
+            border-left: 4px solid #92400E;
+        }
+        .priority-low {
+            background-color: #DBEAFE;
+            color: #1E40AF;
+            border-left: 4px solid #1E40AF;
+        }
+        .status-new {
+            background-color: #E0E7FF;
+            color: #4338CA;
+        }
+        .status-inprogress {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        .status-resolved {
+            background-color: #D1FAE5;
+            color: #047857;
+        }
+        .status-closed {
+            background-color: #E5E7EB;
+            color: #4B5563;
+        }
+        
+        /* Mobile sidebar */
+        @media (max-width: 768px) {
+            .mobile-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            .mobile-sidebar.active {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Mobile Header with Menu Toggle -->
+    <div class="md:hidden bg-blue-800 p-4 flex justify-between items-center">
+        <button id="mobileMenuToggle" class="text-white">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        <span class="text-xl font-bold text-white">Admin Panel</span>
+        <a href="index.html" class="text-white">
+            <i class="fas fa-sign-out-alt text-xl"></i>
+        </a>
+    </div>
+
+    <!-- Sidebar - Default hidden on mobile -->
+    <div id="sidebar" class="fixed left-0 top-0 w-64 h-full bg-blue-800 p-4 z-50 mobile-sidebar md:transform-none md:block">
+        <div class="flex items-center mb-8 mt-2">
+            <img src="admin.jpeg" alt="Mobi-Comm Logo" class="h-8 w-8 mr-2">
+            <span class="text-xl font-bold text-white">Admin Panel</span>
+        </div>
+        
+        <nav class="space-y-4">
+            <a href="admindashboard.html#dashboard" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-tachometer-alt w-6"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="admindashboard.html#plans" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-list w-6"></i>
+                <span>Plans Management</span>
+            </a>
+            <a href="customerdetails.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-users w-6"></i>
+                <span>Customer Details</span>
+            </a>
+            <a href="ex.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-bell w-6"></i><span>Expiring Plans Alert</span>
+            </a>
+            <a href="admin-support.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors bg-blue-900">
+                <i class="fas fa-headset w-6"></i>
+                <span>Support Management</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+
+    <!-- Main Content -->
+    <div class="md:ml-64 p-4 md:p-8 mt-0 md:mt-0">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800">Support Management</h1>
+            <div class="hidden md:flex items-center">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <i class="fas fa-sign-out-alt mr-2"></i> <a href="index.html">Logout</a>
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Summary -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-4 md:p-6 flex items-center card-zoom">
+                <div class="rounded-full bg-blue-100 p-2 md:p-3 mr-3 md:mr-4">
+                    <i class="fas fa-ticket-alt text-blue-600 text-lg md:text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs md:text-sm text-gray-500">Total Tickets</p>
+                    <p class="text-lg md:text-2xl font-bold" id="totalTickets">0</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-4 md:p-6 flex items-center card-zoom">
+                <div class="rounded-full bg-yellow-100 p-2 md:p-3 mr-3 md:mr-4">
+                    <i class="fas fa-clock text-yellow-600 text-lg md:text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs md:text-sm text-gray-500">Pending</p>
+                    <p class="text-lg md:text-2xl font-bold" id="pendingTickets">0</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-4 md:p-6 flex items-center card-zoom">
+                <div class="rounded-full bg-green-100 p-2 md:p-3 mr-3 md:mr-4">
+                    <i class="fas fa-check-circle text-green-600 text-lg md:text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs md:text-sm text-gray-500">Resolved Today</p>
+                    <p class="text-lg md:text-2xl font-bold" id="resolvedToday">0</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-4 md:p-6 flex items-center card-zoom">
+                <div class="rounded-full bg-red-100 p-2 md:p-3 mr-3 md:mr-4">
+                    <i class="fas fa-exclamation-circle text-red-600 text-lg md:text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs md:text-sm text-gray-500">Critical Issues</p>
+                    <p class="text-lg md:text-2xl font-bold" id="criticalIssues">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters (Collapsible on Mobile) -->
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+            <div class="mb-2 md:hidden">
+                <button id="toggleFilters" class="w-full flex justify-between items-center p-2 bg-gray-100 rounded">
+                    <span class="font-medium">Search & Filters</span>
+                    <i class="fas fa-chevron-down" id="filterIcon"></i>
+                </button>
+            </div>
+            <div id="filterContainer" class="hidden md:block">
+                <div class="flex flex-col md:flex-row md:items-center gap-4">
+                    <div class="flex-grow">
+                        <div class="relative">
+                            <input type="text" id="searchTickets" placeholder="Search..." 
+                                class="w-full p-2 md:p-3 pl-8 md:pl-10 border border-gray-300 rounded-lg">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row flex-wrap gap-2">
+                        <select id="statusFilter" class="p-2 md:p-3 border border-gray-300 rounded-lg bg-white">
+                            <option value="">All Status</option>
+                            <option value="New">New</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                        <select id="priorityFilter" class="p-2 md:p-3 border border-gray-300 rounded-lg bg-white">
+                            <option value="">All Priority</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                        <select id="issueTypeFilter" class="p-2 md:p-3 border border-gray-300 rounded-lg bg-white">
+                            <option value="">All Issue Types</option>
+                            <option value="network">Network Issues</option>
+                            <option value="billing">Billing Issues</option>
+                            <option value="plans">Plan Related</option>
+                            <option value="technical">Technical Support</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <div class="flex space-x-2 mt-2 md:mt-0">
+                            <button id="applyFilters" class="bg-blue-600 text-white px-3 md:px-4 py-2 rounded hover:bg-blue-700 flex-grow md:flex-grow-0">
+                                Apply
+                            </button>
+                            <button id="resetFilters" class="bg-gray-200 text-gray-800 px-3 md:px-4 py-2 rounded hover:bg-gray-300 flex-grow md:flex-grow-0">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support Tickets -->
+        <div class="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+            <!-- Mobile Cards View -->
+            <div class="md:hidden space-y-4" id="mobileTicketsView">
+                <!-- Mobile ticket cards will be loaded here -->
+            </div>
+
+            <!-- Desktop Table View -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticket ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Issue Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Submitted</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="ticketsTableBody">
+                        <!-- Ticket data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination - adaptive for mobile and desktop -->
+            <div class="mt-6 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm text-gray-700 mb-4 md:mb-0">
+                    Showing <span id="ticketsShown">0</span> out of <span id="totalTicketsCount">0</span> tickets
+                </p>
+                <div class="flex items-center space-x-2">
+                    <button class="px-3 py-1 rounded border border-gray-300 disabled:opacity-50">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="px-3 py-1 bg-blue-600 text-white rounded">1</span>
+                    <span class="px-3 py-1 rounded border border-gray-300">2</span>
+                    <span class="px-3 py-1 rounded border border-gray-300">3</span>
+                    <span class="px-2">...</span>
+                    <span class="px-3 py-1 rounded border border-gray-300">26</span>
+                    <button class="px-3 py-1 rounded border border-gray-300">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Details Modal (Responsive) -->
+    <div id="ticketModal" class="modal">
+        <div class="modal-content max-w-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold" id="ticketTitle">Ticket Details</h2>
+                <button onclick="closeTicketModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 border-b pb-2">Ticket Information</h3>
+                    <div class="space-y-3">
+                        <p><span class="font-medium">Ticket ID:</span> <span id="modalTicketId"></span></p>
+                        <p><span class="font-medium">Status:</span> <span id="modalStatus"></span></p>
+                        <p><span class="font-medium">Priority:</span> <span id="modalPriority"></span></p>
+                        <p><span class="font-medium">Issue Type:</span> <span id="modalIssueType"></span></p>
+                        <p><span class="font-medium">Submitted:</span> <span id="modalSubmitted"></span></p>
+                        <p><span class="font-medium">Last Updated:</span> <span id="modalUpdated"></span></p>
+                        <p><span class="font-medium">Assigned To:</span> <span id="modalAssigned"></span></p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 border-b pb-2">Customer Information</h3>
+                    <div class="space-y-3">
+                        <p><span class="font-medium">Name:</span> <span id="modalName"></span></p>
+                        <p><span class="font-medium">Mobile:</span> <span id="modalMobile"></span></p>
+                        <p><span class="font-medium">Current Plan:</span> <span id="modalPlan"></span></p>
+                        <p><span class="font-medium">Customer Since:</span> <span id="modalCustomerSince"></span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-4 border-b pb-2">Issue Description</h3>
+                <p id="modalDescription" class="text-gray-700"></p>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-4 border-b pb-2">Communication History</h3>
+                <div id="modalCommunication" class="space-y-4">
+                    <!-- Communication history will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-2">Add Response</h3>
+                <textarea id="responseText" rows="4" placeholder="Type your response here..." 
+                          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"></textarea>
+            </div>
+            
+            <div class="flex flex-col md:flex-row md:justify-between gap-4">
+                <div class="flex flex-col md:flex-row gap-2 md:space-x-3">
+                    <select id="updateStatus" class="p-2 border border-gray-300 rounded-md w-full md:w-auto">
+                        <option value="">Update Status</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                    <select id="updatePriority" class="p-2 border border-gray-300 rounded-md w-full md:w-auto">
+                        <option value="">Update Priority</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                    <select id="assignTo" class="p-2 border border-gray-300 rounded-md w-full md:w-auto">
+                        <option value="">Assign To</option>
+                        <option value="John Smith">John Smith</option>
+                        <option value="Sarah Johnson">Sarah Johnson</option>
+                        <option value="Alex Wong">Alex Wong</option>
+                        <option value="Priya Sharma">Priya Sharma</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 md:space-x-3">
+                    <button id="sendResponse" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-grow md:flex-grow-0">
+                        <i class="fas fa-paper-plane mr-2"></i>Send
+                    </button>
+                    <button id="callCustomer" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex-grow md:flex-grow-0">
+                        <i class="fas fa-phone-alt mr-2"></i>Call
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load tickets from localStorage or initialize empty array
+        let tickets = JSON.parse(localStorage.getItem("supportTickets") || "[]");
+
+        // Initialize sample data if none exists
+        if (tickets.length === 0) {
+            tickets = [
+                {
+                    id: "TKT001",
+                    customer: "John Doe",
+                    mobile: "+91 98765 43210",
+                    issueType: "network",
+                    issueTypeName: "Network Issue",
+                    description: "Unable to make calls in certain areas despite full signal strength.",
+                    submitted: "2025-03-01T10:30:00.000Z",
+                    lastUpdated: "2025-03-01T14:45:00.000Z",
+                    status: "In Progress",
+                    priority: "High",
+                    assignedTo: "Sarah Johnson",
+                    plan: "Premium Unlimited",
+                    customerSince: "2023-05-12",
+                    communication: [
+                        {
+                            sender: "Customer",
+                            timestamp: "2025-03-01T10:30:00.000Z",
+                            message: "I'm having trouble making calls in my office area even though I have full signal bars."
+                        },
+                        {
+                            sender: "System",
+                            timestamp: "2025-03-01T10:30:05.000Z",
+                            message: "Ticket created with ID: TKT001"
+                        },
+                        {
+                            sender: "Admin",
+                            timestamp: "2025-03-01T11:15:00.000Z",
+                            message: "Thank you for reporting this issue. We're investigating the network coverage in your area. Could you please provide your exact office location?"
+                        },
+                        {
+                            sender: "Customer",
+                            timestamp: "2025-03-01T12:30:00.000Z",
+                            message: "My office is at 123 Business Park, Sector 5, Gurgaon."
+                        },
+                        {
+                            sender: "System",
+                            timestamp: "2025-03-01T14:45:00.000Z",
+                            message: "Ticket assigned to Sarah Johnson"
+                        }
+                    ]
+                },
+                {
+                    id: "TKT002",
+                    customer: "Jane Smith",
+                    mobile: "+91 87654 32109",
+                    issueType: "billing",
+                    issueTypeName: "Billing Issue",
+                    description: "Double charged for last month's plan renewal.",
+                    submitted: "2025-03-02T09:15:00.000Z",
+                    lastUpdated: "2025-03-02T09:15:00.000Z",
+                    status: "New",
+                    priority: "Medium",
+                    assignedTo: "Unassigned",
+                    plan: "Basic Data",
+                    customerSince: "2022-11-30",
+                    communication: [
+                        {
+                            sender: "Customer",
+                            timestamp: "2025-03-02T09:15:00.000Z",
+                            message: "I was charged twice for my plan renewal on March 1st. Please check and refund the extra amount."
+                        },
+                        {
+                            sender: "System",
+                            timestamp: "2025-03-02T09:15:05.000Z",
+                            message: "Ticket created with ID: TKT002"
+                        }
+                    ]
+                }
+            ];
+            localStorage.setItem("supportTickets", JSON.stringify(tickets));
+        }
+
+        // Function to update dashboard statistics
+        function updateDashboardStats() {
+            const totalTickets = tickets.length;
+            const pendingTickets = tickets.filter(t => t.status === "New" || t.status === "In Progress").length;
+            const today = new Date().toISOString().split('T')[0];
+            const resolvedToday = tickets.filter(t => t.status === "Resolved" && t.lastUpdated.startsWith(today)).length;
+            const criticalIssues = tickets.filter(t => t.priority === "High").length;
+
+            document.getElementById('totalTickets').textContent = totalTickets;
+            document.getElementById('pendingTickets').textContent = pendingTickets;
+            document.getElementById('resolvedToday').textContent = resolvedToday;
+            document.getElementById('criticalIssues').textContent = criticalIssues;
+        }
+
+        // Function to load tickets into the table and mobile view
+        function loadTickets() {
+            const tableBody = document.getElementById('ticketsTableBody');
+            const mobileView = document.getElementById('mobileTicketsView');
+            
+            tableBody.innerHTML = '';
+            mobileView.innerHTML = '';
+
+            tickets.forEach(ticket => {
+                // Create desktop table row
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-blue-600">${ticket.id}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="h-8 w-8 flex-shrink-0 rounded-full bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-500 font-medium">${ticket.customer.split(' ').map(n => n[0]).join('')}</span>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${ticket.customer}</div>
+                                <div class="text-sm text-gray-500">${ticket.mobile}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getIssueTypeStyle(ticket.issueType)}">
+                            ${ticket.issueTypeName}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900 truncate max-w-xs">${ticket.description}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${formatDateTime(ticket.submitted)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyle(ticket.status)}">
+                            ${ticket.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium ${getPriorityColor(ticket.priority)}">
+                            ${ticket.priority}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <button onclick="viewTicketDetails('${ticket.id}')" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+
+                // Create mobile card
+                const card = document.createElement('div');
+                card.className = 'bg-white border rounded-lg shadow-sm';
+                card.innerHTML = `
+                    <div class="p-4 border-b flex justify-between items-center">
+                        <div>
+                            <span class="text-blue-600 font-semibold">${ticket.id}</span>
+                            <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full ${getStatusStyle(ticket.status)}">
+                                ${ticket.status}
+                            </span>
+                        </div>
+                        <span class="text-xs font-medium ${getPriorityColor(ticket.priority)}">
+                            ${ticket.priority}
+                        </span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex items-center mb-3">
+                            <div class="h-8 w-8 flex-shrink-0 rounded-full bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-500 font-medium">${ticket.customer.split(' ').map(n => n[0]).join('')}</span>
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium">${ticket.customer}</div>
+                                <div class="text-xs text-gray-500">${ticket.mobile}</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full ${getIssueTypeStyle(ticket.issueType)} mb-2">
+                                ${ticket.issueTypeName}
+                            </span>
+                            <p class="text-sm text-gray-700">${ticket.description}</p>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-3">
+                            Submitted: ${formatDateTime(ticket.submitted)}
+                        </div>
+                        <button onclick="viewTicketDetails('${ticket.id}')" class="w-full bg-blue-50 text-blue-600 p-2 rounded text-center
+                                                <button onclick="viewTicketDetails('${ticket.id}')" class="w-full bg-blue-50 text-blue-600 p-2 rounded text-center">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                    </div>
+                `;
+                mobileView.appendChild(card);
+            });
+
+            // Update dashboard stats after loading tickets
+            updateDashboardStats();
+        }
+
+        // Function to format date and time
+        function formatDateTime(dateTime) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateTime).toLocaleString(undefined, options);
+        }
+
+        // Get issue type style
+        function getIssueTypeStyle(issueType) {
+            switch (issueType) {
+                case 'network':
+                    return 'bg-green-100 text-green-800';
+                case 'billing':
+                    return 'bg-yellow-100 text-yellow-800';
+                case 'technical':
+                    return 'bg-blue-100 text-blue-800';
+                case 'plans':
+                    return 'bg-purple-100 text-purple-800';
+                default:
+                    return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        // Get status style
+        function getStatusStyle(status) {
+            switch (status) {
+                case 'New':
+                    return 'bg-blue-100 text-blue-600';
+                case 'In Progress':
+                    return 'bg-yellow-100 text-yellow-600';
+                case 'Resolved':
+                    return 'bg-green-100 text-green-600';
+                case 'Closed':
+                    return 'bg-gray-100 text-gray-600';
+                default:
+                    return 'bg-gray-200 text-gray-600';
+            }
+        }
+
+        // Get priority color
+        function getPriorityColor(priority) {
+            switch (priority) {
+                case 'High':
+                    return 'text-red-600';
+                case 'Medium':
+                    return 'text-yellow-600';
+                case 'Low':
+                    return 'text-green-600';
+                default:
+                    return 'text-gray-600';
+            }
+        }
+
+        // Function to view ticket details
+        function viewTicketDetails(ticketId) {
+            const ticket = tickets.find(t => t.id === ticketId);
+            if (ticket) {
+                document.getElementById('modalTicketId').textContent = ticket.id;
+                document.getElementById('modalStatus').textContent = ticket.status;
+                document.getElementById('modalPriority').textContent = ticket.priority;
+                document.getElementById('modalIssueType').textContent = ticket.issueTypeName;
+                document.getElementById('modalSubmitted').textContent = formatDateTime(ticket.submitted);
+                document.getElementById('modalUpdated').textContent = formatDateTime(ticket.lastUpdated);
+                document.getElementById('modalAssigned').textContent = ticket.assignedTo;
+                document.getElementById('modalName').textContent = ticket.customer;
+                document.getElementById('modalMobile').textContent = ticket.mobile;
+                document.getElementById('modalPlan').textContent = ticket.plan;
+                document.getElementById('modalCustomerSince').textContent = ticket.customerSince;
+                document.getElementById('modalDescription').textContent = ticket.description;
+
+                // Load communication history
+                const communicationContainer = document.getElementById('modalCommunication');
+                communicationContainer.innerHTML = '';
+                ticket.communication.forEach(comm => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'border p-2 rounded mb-2';
+                    messageDiv.innerHTML = `<strong>${comm.sender}:</strong> <span>${comm.message}</span> <small class="text-gray-500">(${formatDateTime(comm.timestamp)})</small>`;
+                    communicationContainer.appendChild(messageDiv);
+                });
+
+                // Show the modal
+                document.getElementById('ticketModal').style.display = 'block';
+            }
+        }
+
+        // Function to close the ticket modal
+        function closeTicketModal() {
+            document.getElementById('ticketModal').style.display = 'none';
+        }
+
+        // Load initial data
+        loadTickets();
+        // Add this code at the end of your existing script tag
+
+// Mobile menu toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Mobile sidebar toggle
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    if (mobileMenuToggle && sidebar && sidebarOverlay) {
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+        
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.add('hidden');
+        });
+    }
+    
+    // Search and filters toggle
+    const toggleFilters = document.getElementById('toggleFilters');
+    const filterContainer = document.getElementById('filterContainer');
+    const filterIcon = document.getElementById('filterIcon');
+    
+    if (toggleFilters && filterContainer && filterIcon) {
+        toggleFilters.addEventListener('click', function() {
+            filterContainer.classList.toggle('hidden');
+            filterIcon.classList.toggle('fa-chevron-down');
+            filterIcon.classList.toggle('fa-chevron-up');
+        });
+    }
+    
+    // Apply and reset filter buttons
+    const applyFilters = document.getElementById('applyFilters');
+    const resetFilters = document.getElementById('resetFilters');
+    
+    if (applyFilters) {
+        applyFilters.addEventListener('click', function() {
+            // Filter functionality would go here
+            console.log('Filters applied');
+        });
+    }
+    
+    if (resetFilters) {
+        resetFilters.addEventListener('click', function() {
+            // Reset functionality would go here
+            document.getElementById('searchTickets').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('priorityFilter').value = '';
+            document.getElementById('issueTypeFilter').value = '';
+            console.log('Filters reset');
+        });
+    }
+});
+    </script>
+</body>
+</html>

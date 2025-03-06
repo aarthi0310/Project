@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobi-Comm | Profile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Navbar Styles */
+        nav {
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .max-w-7xl {
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .h-16 {
+            height: 4rem;
+        }
+
+        .h-8 {
+            height: 2rem;
+        }
+
+        .w-8 {
+            width: 2rem;
+        }
+
+        .mr-2 {
+            margin-right: 0.5rem;
+        }
+
+        .text-xl {
+            font-size: 1.25rem;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .text-blue-600 {
+            color: #2563eb;
+        }
+
+        .space-x-8 > :not([hidden]) ~ :not([hidden]) {
+            margin-left: 2rem;
+        }
+
+        .text-gray-600 {
+            color: #4b5563;
+        }
+
+        .hover\:text-blue-600:hover {
+            color: #2563eb;
+        }
+
+        .transition {
+            transition: all 0.3s ease;
+        }
+
+        .relative {
+            position: relative;
+        }
+
+        nav a {
+            text-decoration: none;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            border-radius: 8px;
+            padding: 8px 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            padding: 8px 16px;
+            text-decoration: none;
+            display: block;
+            transition: all 0.15s ease;
+            color: #4b5563;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #f0f7ff;
+            color: #2563eb;
+        }
+
+        .h-6 {
+            height: 1.5rem;
+        }
+
+        .w-6 {
+            width: 1.5rem;
+        }
+
+        .h-4 {
+            height: 1rem;
+        }
+
+        .w-4 {
+            width: 1rem;
+        }
+
+        .ml-1 {
+            margin-left: 0.25rem;
+        }
+
+        /* Existing Profile Styles */
+        .hero {
+            background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+            padding: 120px 20px 48px;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .profile-container {
+            max-width: 1000px;
+            margin: 32px auto;
+            padding: 0 20px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .profile-card h2 {
+            color: #1f2937;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .info-group {
+            margin-bottom: 16px;
+        }
+
+        .info-label {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .plan-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #f0f7ff;
+            color: #2563eb;
+            border-radius: 16px;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .edit-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .edit-button:hover {
+            background: #1d4ed8;
+        }
+
+        .edit-mode input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .save-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .save-button:hover {
+            background: #059669;
+        }
+
+        .cancel-button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .cancel-button:hover {
+            background: #dc2626;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 640px) { /* Mobile */
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 4rem;
+                left: 0;
+                background-color: white;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+
+            .nav-links.show {
+                display: flex;
+            }
+
+            .nav-links a, .nav-links .relative {
+                padding: 0.75rem 1rem;
+                width: 100%;
+                text-align: left;
+            }
+
+            .dropdown-menu {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .hero {
+                padding: 100px 15px 30px;
+            }
+
+            .hero h1 {
+                font-size: 24px;
+            }
+
+            .hero p {
+                font-size: 14px;
+            }
+
+            .profile-container {
+                margin: 16px auto;
+                padding: 0 10px;
+            }
+
+            .profile-card {
+                padding: 16px;
+            }
+
+            .profile-card h2 {
+                font-size: 18px;
+            }
+
+            .edit-button, .save-button, .cancel-button {
+                width: 100%;
+                padding: 10px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        @media (min-width: 641px) and (max-width: 1023px) { /* Tablet */
+            .hero {
+                padding: 110px 20px 40px;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .profile-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .profile-card {
+                padding: 20px;
+            }
+
+            .edit-button, .save-button, .cancel-button {
+                padding: 8px 14px;
+            }
+        }
+
+        @media (min-width: 1024px) { /* Desktop */
+            .mobile-menu-button {
+                display: none;
+            }
+
+            .profile-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-lg fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+            <div class="flex items-center">
+                <a href="index.html"><span class="text-xl font-bold text-blue-600">Mobi-Comm</span></a>
+            </div>
+            <div class="flex items-center space-x-8 nav-links" id="navLinks">
+                <a href="/index.html" class="text-gray-600 hover:text-blue-600 transition">Home</a>
+                <a href="plan1.html" class="text-blue-600 font-medium">Plans</a>
+                <a href="recharge.html" class="text-gray-600 hover:text-blue-600 transition">Recharge</a>
+                <a href="support.html" class="text-gray-600 hover:text-blue-600 transition">Support</a>
+                <div class="relative" id="accountDropdown">
+                    <button class="flex items-center text-gray-600 hover:text-blue-600 transition" id="accountDropdownButton">
+                        <!-- Professional user icon -->
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <svg class="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                       
+                        <a href="/index.html" class="block px-4 py-2 text-blue-600 hover:bg-blue-50 hover:text-blue-600 rounded-md transition-colors duration-150 flex items-center">
+                            <!-- Reduced Logout icon -->
+                            <svg class="h-4 w-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                            </svg>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-button md:hidden text-gray-600" id="mobileMenuButton">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>My Profile</h1>
+        <p>Manage your account and view your current plan</p>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="profile-container">
+        <div class="profile-grid">
+            <div class="profile-card">
+                <h2>Personal Information</h2>
+                <!-- View Mode -->
+                <div id="viewMode">
+                    <div class="info-group">
+                        <p class="info-label">Name</p>
+                        <p class="info-value" id="profileName">Aarthi V</p>
+                    </div>
+                    <div class="info-group">
+                        <p class="info-label">Email</p>
+                        <p class="info-value" id="profileEmail">aarthivadivel@gmail.com</p>
+                    </div>
+                    <div class="info-group">
+                        <p class="info-label">Phone Number</p>
+                        <p class="info-value" id="profilePhone">Not set</p>
+                    </div>
+                    <button class="edit-button" id="editButton">Edit Profile</button>
+                </div>
+                <!-- Edit Mode -->
+                <div id="editMode" class="hidden">
+                    <div class="info-group">
+                        <p class="info-label">Name</p>
+                        <input type="text" id="nameInput" value="Aarthi V">
+                    </div>
+                    <div class="info-group">
+                        <p class="info-label">Email</p>
+                        <input type="email" id="emailInput" value="aarthivadivel@gmail.com">
+                    </div>
+                    <div class="info-group">
+                        <p class="info-label">Phone Number</p>
+                        <input type="tel" id="phoneInput" placeholder="Enter phone number" readonly>
+                    </div>
+                    <div class="button-group">
+                        <button class="save-button" id="saveButton">Save Changes</button>
+                        <button class="cancel-button" id="cancelButton">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-card">
+                <h2>Current Plan</h2>
+                <div class="info-group">
+                    <p class="info-label">Data</p>
+                    <p class="info-value" id="planData">Not set</p>
+                </div>
+                <div class="info-group">
+                    <p class="info-label">Validity</p>
+                    <p class="info-value" id="planValidity">Not set</p>
+                </div>
+                <div class="info-group">
+                    <p class="info-label">Status</p>
+                    <span class="plan-badge" id="planStatus">Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const viewMode = document.getElementById('viewMode');
+        const editMode = document.getElementById('editMode');
+        const editButton = document.getElementById('editButton');
+        const saveButton = document.getElementById('saveButton');
+        const cancelButton = document.getElementById('cancelButton');
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profilePhone = document.getElementById('profilePhone');
+        const nameInput = document.getElementById('nameInput');
+        const emailInput = document.getElementById('emailInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const accountDropdownButton = document.getElementById('accountDropdownButton');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const navLinks = document.getElementById('navLinks');
+
+        // Function to set specific user data based on phone number
+        function setSpecificUserData(phoneNumber) {
+            if (phoneNumber === '9080725935') {
+                profileName.textContent = 'Vadivel R';
+                profileEmail.textContent = 'vadivel@gmail.com';
+                nameInput.value = 'Vadivel R';
+                emailInput.value = 'vadivel@gmail.com';
+                localStorage.setItem('userName', 'Vadivel R');
+                localStorage.setItem('userEmail', 'vadivel@gmail.com');
+                return true;
+            } else if (phoneNumber === '8090420042') {
+                profileName.textContent = 'Aarthi V';
+                profileEmail.textContent = 'aarthi@gmail.com';
+                nameInput.value = 'Aarthi V';
+                emailInput.value = 'aarthi@gmail.com';
+                localStorage.setItem('userName', 'Aarthi V');
+                localStorage.setItem('userEmail', 'aarthi@gmail.com');
+                return true;
+            }
+            return false;
+        }
+
+        // Update phone number
+        function updatePhoneNumber() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const phoneFromUrl = urlParams.get('phone');
+            const phoneFromLocalStorage = localStorage.getItem('userPhone');
+            const phoneFromSessionStorage = sessionStorage.getItem('phoneNumber');
+            const phoneNumber = phoneFromUrl || phoneFromLocalStorage || phoneFromSessionStorage || 'Not set';
+
+            if (phoneNumber !== 'Not set') {
+                profilePhone.textContent = phoneNumber;
+                phoneInput.value = phoneNumber;
+                localStorage.setItem('userPhone', phoneNumber);
+                sessionStorage.setItem('phoneNumber', phoneNumber);
+                return setSpecificUserData(phoneNumber);
+            }
+            return false;
+        }
+
+        // Toggle edit mode
+        function toggleEditMode() {
+            viewMode.classList.toggle('hidden');
+            editMode.classList.toggle('hidden');
+            nameInput.value = profileName.textContent;
+            emailInput.value = profileEmail.textContent;
+            phoneInput.value = profilePhone.textContent !== 'Not set' ? profilePhone.textContent : '';
+        }
+
+        // Save changes
+        function saveChanges() {
+            profileName.textContent = nameInput.value;
+            profileEmail.textContent = emailInput.value;
+            profilePhone.textContent = phoneInput.value || 'Not set';
+            localStorage.setItem('userName', nameInput.value);
+            localStorage.setItem('userEmail', emailInput.value);
+            localStorage.setItem('userPhone', phoneInput.value);
+            sessionStorage.setItem('phoneNumber', phoneInput.value);
+            toggleEditMode();
+        }
+
+        // Event listeners
+        editButton.addEventListener('click', toggleEditMode);
+        saveButton.addEventListener('click', saveChanges);
+        cancelButton.addEventListener('click', toggleEditMode);
+
+        // Mobile menu toggle
+        mobileMenuButton.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+        });
+
+        // Dropdown functionality
+        accountDropdownButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close dropdown and mobile menu when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!accountDropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+            if (!mobileMenuButton.contains(event.target) && !navLinks.contains(event.target)) {
+                navLinks.classList.remove('show');
+            }
+        });
+
+        // Load user data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const phoneDataSet = updatePhoneNumber();
+            if (!phoneDataSet) {
+                const savedName = localStorage.getItem('userName');
+                const savedEmail = localStorage.getItem('userEmail');
+                if (savedName) profileName.textContent = savedName;
+                if (savedEmail) profileEmail.textContent = savedEmail;
+            }
+
+            // Load plan info
+            try {
+                const planInfo = JSON.parse(sessionStorage.getItem('selectedPlan'));
+                if (planInfo) {
+                    document.getElementById('planData').textContent = planInfo.data;
+                    document.getElementById('planValidity').textContent = planInfo.validity;
+                }
+            } catch (error) {
+                console.error('Error loading plan info:', error);
+            }
+        });
+
+        // Listen for storage changes
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'userPhone' || e.key === 'phoneNumber') {
+                updatePhoneNumber();
+            }
+        });
+    </script>
+</body>
+</html>

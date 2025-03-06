@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobi-Comm | Recharge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            z-index: 50;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .carousel {
+            overflow: hidden;
+            position: relative;
+        }
+        .carousel-container {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .carousel-slide {
+            min-width: 100%;
+        }
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .phone-input.invalid {
+            border-color: #EF4444;
+        }
+        .error-message {
+            display: none;
+            color: #EF4444;
+            font-size: 0.875rem;
+        }
+        .error-message.show {
+            display: block;
+        }
+        .selected-plan-card {
+            background-color: #f0f7ff;
+            border-left: 4px solid #2563eb;
+            transition: all 0.3s ease;
+        }
+        .selected-plan-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive Navbar Adjustments */
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+        @media (max-width: 640px) { /* Mobile */
+            .nav-links {
+                display: none; /* Hidden by default on mobile */
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 4rem; /* Position below navbar */
+                left: 0;
+                background-color: white;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                padding: 0.5rem 0;
+                z-index: 40; /* Ensure visibility */
+            }
+            .nav-links.show {
+                display: flex; /* Show when toggled */
+            }
+            .nav-links a, .nav-links .relative {
+                padding: 0.75rem 1rem;
+                width: 100%;
+                text-align: left;
+            }
+            .dropdown-menu {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            .hero-gradient {
+                padding-top: 6rem;
+                padding-bottom: 2rem;
+            }
+            .hero-gradient h1 {
+                font-size: 1.5rem;
+            }
+            .hero-gradient p {
+                font-size: 0.875rem;
+            }
+            .selected-plan-card, .benefit-card, #rechargeFormContainer .bg-white {
+                padding: 1rem;
+            }
+            .carousel-slide {
+                padding: 0.5rem;
+            }
+            footer {
+                padding: 2rem 1rem;
+            }
+        }
+        @media (min-width: 641px) and (max-width: 1023px) { /* Tablet */
+            .nav-links {
+                display: flex; /* Always visible */
+            }
+            .mobile-menu-button {
+                display: none;
+            }
+            .hero-gradient {
+                padding-top: 7rem;
+                padding-bottom: 2.5rem;
+            }
+        }
+        @media (min-width: 1024px) { /* Desktop */
+            .mobile-menu-button {
+                display: none;
+            }
+            .nav-links {
+                display: flex; /* Always visible */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 flex justify-between items-center h-16">
+            <div class="flex items-center">
+                <a href="index.html">
+                    <span class="text-xl font-bold text-blue-600">Mobi-Comm</span>
+                </a>
+            </div>
+            <div class="flex items-center space-x-8 nav-links" id="navLinks">
+                <a href="/index.html" class="text-gray-600 hover:text-blue-600 transition">Home</a>
+                <a href="plan1.html" class="text-gray-600 hover:text-blue-600 transition">Plans</a>
+                <a href="recharge.html" class="text-blue-600 font-medium">Recharge</a>
+                <a href="support.html" class="text-gray-600 hover:text-blue-600 transition">Support</a>
+                <div class="relative" id="accountDropdown">
+                    <!-- Account dropdown content removed -->
+                </div>
+            </div>
+            <button class="mobile-menu-button md:hidden text-gray-600" id="mobileMenuButton">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <div class="hero-gradient pt-28 pb-12 text-center text-white">
+        <h1 class="text-4xl font-bold mb-2">Recharge</h1>
+        <p class="text-lg opacity-90 max-w-2xl mx-auto px-4">
+            Recharge in seconds and stay connected with your loved ones
+        </p>
+    </div>
+
+    <!-- Selected Plan Section -->
+    <div id="selectedPlanContainer" class="max-w-4xl mx-auto -mt-6 px-4 mb-4 hidden">
+        <div class="selected-plan-card rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Selected Plan</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 id="selectedPlanName" class="text-xl font-semibold text-gray-800 mb-2">--</h3>
+                    <div class="flex items-center mb-1">
+                        <i class="fas fa-rupee-sign text-gray-600 mr-2"></i>
+                        <span class="text-gray-600">Price:</span>
+                        <span id="selectedPlanPrice" class="ml-1 font-medium">--</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center mb-1">
+                        <i class="fas fa-wifi text-gray-600 mr-2"></i>
+                        <span class="text-gray-600">Data:</span>
+                        <span id="selectedPlanData" class="ml-1 font-medium">--</span>
+                    </div>
+                    <div class="flex items-center mb-1">
+                        <i class="fas fa-calendar-alt text-gray-600 mr-2"></i>
+                        <span class="text-gray-600">Validity:</span>
+                        <span id="selectedPlanValidity" class="ml-1 font-medium">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recharge Form Section -->
+    <div class="max-w-4xl mx-auto px-4" id="rechargeFormContainer">
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Enter Mobile Number</h2>
+            <form id="rechargeForm" class="space-y-4">
+                <div>
+                    <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">+91</span>
+                        </div>
+                        <input
+                            type="text"
+                            id="phoneNumber"
+                            maxlength="10"
+                            placeholder="Enter 10 digit mobile number"
+                            class="phone-input pl-12 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                    </div>
+                    <p id="phoneError" class="error-message mt-1">Please enter a valid 10 digit mobile number</p>
+                </div>
+                <div class="pt-4">
+                    <button
+                        type="submit"
+                        id="rechargeButton"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        Continue
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Benefits Carousel Section -->
+    <div class="max-w-6xl mx-auto px-4 mb-12">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Recharge Benefits</h2>
+        <div class="carousel relative mb-6">
+            <div class="carousel-container">
+                <div class="carousel-slide p-2">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-lg p-6 text-white">
+                        <h3 class="text-xl font-bold mb-2">Seamless Experience!</h3>
+                        <p class="mb-4">User-friendly platform for hassle-free recharges.</p>
+                    </div>
+                </div>
+                <div class="carousel-slide p-2">
+                    <div class="bg-gradient-to-r from-purple-500 to-indigo-700 rounded-lg shadow-lg p-6 text-white">
+                        <h3 class="text-xl font-bold mb-2">Multiple Payment Options!</h3>
+                        <p class="mb-4">Pay via UPI, debit/credit cards, net banking.</p>
+                    </div>
+                </div>
+                <div class="carousel-slide p-2">
+                    <div class="bg-gradient-to-r from-green-500 to-teal-700 rounded-lg shadow-lg p-6 text-white">
+                        <h3 class="text-xl font-bold mb-2">Instant Activation!</h3>
+                        <p class="mb-4">Recharge processed in seconds without delays.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-prev absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md z-10">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <button class="carousel-next absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md z-10">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="benefit-card bg-white p-6 rounded-lg shadow-md transition duration-300">
+                <div class="flex items-center mb-4">
+                    <div class="bg-blue-100 rounded-full p-3 mr-3">
+                        <i class="fas fa-bolt text-blue-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg">Instant Recharge</h3>
+                </div>
+                <p class="text-gray-600">Recharge instantly 24/7, no waiting time.</p>
+            </div>
+            <div class="benefit-card bg-white p-6 rounded-lg shadow-md transition duration-300">
+                <div class="flex items-center mb-4">
+                    <div class="bg-green-100 rounded-full p-3 mr-3">
+                        <i class="fas fa-shield-alt text-green-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg">Secure Transactions</h3>
+                </div>
+                <p class="text-gray-600">Encrypted and fully secured transactions.</p>
+            </div>
+            <div class="benefit-card bg-white p-6 rounded-lg shadow-md transition duration-300">
+                <div class="flex items-center mb-4">
+                    <div class="bg-yellow-100 rounded-full p-3 mr-3">
+                        <i class="fas fa-gift text-yellow-600 text-xl"></i>
+                    </div>
+                    <h3 class="font-semibold text-lg">Convenience</h3>
+                </div>
+                <p class="text-gray-600">Recharge from anywhere, anytime.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-8">
+                <p class="font-semibold text-lg">Join Mobi-Comm for Seamless Experience</p>
+                <p class="text-gray-400">Fast, secure, and reliable recharge services</p>
+            </div>
+            <div class="flex justify-center space-x-8">
+                <a href="support.html" class="text-white hover:text-blue-600">Terms of Service</a>
+                <a href="support.html" class="text-white hover:text-blue-600">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuButton.addEventListener('click', function(event) {
+            event.stopPropagation();
+            navLinks.classList.toggle('show');
+        });
+
+        // Close mobile menu when clicking outside
+        window.addEventListener('click', function(event) {
+            if (!mobileMenuButton.contains(event.target) && !navLinks.contains(event.target)) {
+                navLinks.classList.remove('show');
+            }
+        });
+
+        // Form Validation
+        const rechargeForm = document.getElementById('rechargeForm');
+        const phoneInput = document.getElementById('phoneNumber');
+        const phoneError = document.getElementById('phoneError');
+        const mobiCommNumbers = ['8090420042', '9080725935'];
+
+        const isFirstVisit = !sessionStorage.getItem('hasVisitedRecharge');
+        if (isFirstVisit) {
+            sessionStorage.setItem('hasVisitedRecharge', 'true');
+            phoneInput.value = '';
+        }
+
+        rechargeForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const phoneNumber = phoneInput.value;
+
+            if (!/^\d{10}$/.test(phoneNumber)) {
+                phoneInput.classList.add('invalid');
+                phoneError.classList.add('show');
+                return;
+            }
+
+            phoneInput.classList.remove('invalid');
+            phoneError.classList.remove('show');
+
+            localStorage.setItem('userPhone', phoneNumber);
+            sessionStorage.setItem('phoneNumber', phoneNumber);
+
+            if (!mobiCommNumbers.includes(phoneNumber)) {
+                phoneInput.classList.add('invalid');
+                phoneError.textContent = "Please enter a valid Mobi-Comm number";
+                phoneError.classList.add('show');
+                return;
+            }
+
+            // Fetch URL parameters inside the submit handler
+            const urlParams = new URLSearchParams(window.location.search);
+            const planName = urlParams.get('planName');
+            const price = urlParams.get('price');
+            const data = urlParams.get('data');
+            const validity = urlParams.get('validity');
+
+            if (planName && price && data && validity) {
+                const paymentUrl = `payment.html?phone=${encodeURIComponent(phoneNumber)}&planName=${encodeURIComponent(planName)}&price=${encodeURIComponent(price)}&data=${encodeURIComponent(data)}&validity=${encodeURIComponent(validity)}`;
+                window.location.href = paymentUrl;
+            } else {
+                window.location.href = `plan2.html?phone=${encodeURIComponent(phoneNumber)}`;
+            }
+        });
+
+        // Handle selected plan display
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const phoneFromUrl = urlParams.get('phone');
+            if (phoneFromUrl) {
+                phoneInput.value = phoneFromUrl;
+                localStorage.setItem('userPhone', phoneFromUrl);
+                sessionStorage.setItem('phoneNumber', phoneFromUrl);
+                sessionStorage.setItem('hasVisitedRecharge', 'true');
+            }
+
+            const planName = urlParams.get('planName');
+            const price = urlParams.get('price');
+            const data = urlParams.get('data');
+            const validity = urlParams.get('validity');
+
+            if (planName && price && data && validity) {
+                document.getElementById('selectedPlanContainer').classList.remove('hidden');
+                document.getElementById('selectedPlanName').textContent = planName;
+                document.getElementById('selectedPlanPrice').textContent = '₹' + price;
+                document.getElementById('selectedPlanData').textContent = data;
+                document.getElementById('selectedPlanValidity').textContent = validity;
+            }
+        });
+
+        // Carousel implementation
+        const carousel = document.querySelector('.carousel');
+        const container = document.querySelector('.carousel-container');
+        const slides = document.querySelectorAll('.carousel-slide');
+        const prevBtn = document.querySelector('.carousel-prev');
+        const nextBtn = document.querySelector('.carousel-next');
+
+        let currentIndex = 0;
+        const slideCount = slides.length;
+
+        function updateCarousel() {
+            const slideWidth = carousel.clientWidth;
+            container.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+        }
+
+        window.addEventListener('resize', updateCarousel);
+
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + slideCount) % slideCount;
+            updateCarousel();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % slideCount;
+            updateCarousel();
+        });
+
+        updateCarousel();
+    </script>
+</body>
+</html>

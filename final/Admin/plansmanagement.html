@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobi-Comm Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Sidebar Navigation */
+        .sidebar-nav:hover { 
+            background-color:rgb(66, 66, 150); 
+            border-radius: 0.5rem; 
+        }
+
+        /* Notification Badge Animation */
+        .notification-badge { 
+            animation: pulse 2s infinite; 
+        }
+
+        @keyframes pulse { 
+            0%, 100% { transform: scale(1); } 
+            50% { transform: scale(1.1); } 
+        }
+
+        /* Modal Styling */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            z-index: 100; 
+            overflow-y: auto; 
+        }
+
+        .modal-content { 
+            background-color: white; 
+            margin: 5% auto; 
+            padding: 20px; 
+            border-radius: 8px; 
+            width: 80%; 
+            max-width: 500px; 
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+
+        .switch input { 
+            opacity: 0; 
+            width: 0; 
+            height: 0; 
+        }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 2px; bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .switch-slider {
+            background-color: #10b981;
+        }
+
+        input:checked + .switch-slider:before {
+            transform: translateX(16px);
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .edit-btn { color: #3b82f6; }
+        .edit-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
+        .delete-btn { color: #ef4444; }
+        .delete-btn:hover { background-color: rgba(239, 68, 68, 0.1); }
+
+        /* Fixed Sidebar */
+        .fixed-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 16rem;
+            height: 100vh;
+            background-color:rgb(66, 66, 150);
+            padding: 1rem;
+            z-index: 50;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 16rem;
+            padding: 2rem;
+        }
+
+        /* Analytics Bar */
+        .analytics-bar {
+            background-color: #3b82f6;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bulk-action-btn {
+            background-color: #6b7280;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .bulk-action-btn:hover {
+            background-color: #4b5563;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-active { background-color: #10b981; }
+        .status-inactive { background-color: #ef4444; }
+        /* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 60;
+    background: #1e3a8a;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+}
+
+/* Responsive Adjustments */
+/* Mobile (max-width: 640px) */
+@media (max-width: 640px) {
+    .fixed-sidebar {
+        transform: translateX(-100%);
+        width: 75%;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .fixed-sidebar.show {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 3rem 1rem 1rem 1rem; /* Increased top padding to avoid toggle overlap */
+    }
+    .main-content h1 {
+        margin-left: 2.5rem; /* Shift header text to avoid toggle */
+    }
+    .mobile-menu-toggle {
+        display: block;
+    }
+    .flex-wrap.justify-between {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .space-x-2 {
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    .space-x-2 > * {
+        width: 100%;
+        margin-left: 0 !important;
+    }
+    .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    thead tr th:nth-child(3), tbody tr td:nth-child(3), /* Data */
+    thead tr th:nth-child(5), tbody tr td:nth-child(5) /* Category */ {
+        display: none;
+    }
+    .modal-content {
+        width: 90%;
+        max-width: 100%;
+        padding: 1rem;
+    }
+    .modal-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Desktop (min-width: 1024px) */
+@media (min-width: 1024px) {
+    .fixed-sidebar {
+        width: 16rem;
+    }
+    .main-content {
+        margin-left: 16rem;
+        padding: 2rem;
+    }
+    .mobile-menu-toggle {
+        display: none;
+    }
+    .flex-wrap.justify-between {
+        flex-direction: row;
+    }
+    .space-x-2 {
+        flex-direction: row;
+    }
+}
+    </style>
+</head>
+<body class="bg-gray-100">
+    <button class="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
+    <!-- Fixed Sidebar -->
+    <div class="fixed-sidebar">
+        <div class="flex items-center mb-8 mt-2">
+            <img src="/assesst\Images\admin.jpeg" alt="Mobi-Comm Logo" class="h-8 w-8 mr-2">
+            <span class="text-xl font-bold text-white">Admin Panel</span>
+        </div>
+        <nav class="space-y-4">
+            <a href="admindashboard.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-tachometer-alt w-6"></i><span>Dashboard</span>
+            </a>
+            <a href="plansmanagement.html" class="sidebar-nav flex items-center text-white p-2 rounded bg-blue-900">
+                <i class="fas fa-list w-6"></i><span>Plans Management</span>
+            </a>
+            <a href="customerdetails.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-users w-6"></i><span>Customer Details</span>
+            </a>
+           
+            <a href="ex.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-bell w-6"></i><span>Expiring Plans Alert</span>
+            </a>
+            <a href="admin-support.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors bg-blue-900">
+                <i class="fas fa-headset w-6"></i>
+                <span>Support Management</span>
+            </a>
+           
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-800">Plans Management</h1>
+            
+            <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <i class="fas fa-sign-out-alt mr-2"></i><a href="/index.html" class="text-white">Logout</a>
+            </button>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <!-- Quick Analytics Bar -->
+            <div class="analytics-bar">
+                <span>Total Plans: <strong id="totalPlans">0</strong></span>
+                <span>Active: <strong id="activePlans">0</strong></span>
+                <span>Average Price: <strong id="avgPrice">₹0</strong></span>
+            </div>
+
+            <!-- Filter and Action Toolbar -->
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                <div class="flex flex-wrap space-x-2 items-center">
+                    <input type="text" id="searchPlans" placeholder="Search plans..." class="p-2 border rounded-md">
+                    <select id="categoryFilter" class="p-2 border rounded-md">
+                        <option value="all">All Categories</option>
+                        <option value="popular">Popular</option>
+                        <option value="validity">Validity</option>
+                        <option value="data">Data</option>
+                        <option value="unlimited">Unlimited</option>
+                        <option value="entertainment">Entertainment</option>
+                        <option value="international">International</option>
+                    </select>
+                    <select id="statusFilter" class="p-2 border rounded-md">
+                        <option value="all">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="bulk-action-btn" onclick="bulkToggle(true)"><i class="fas fa-power-off mr-2"></i>Activate All</button>
+                    <button class="bulk-action-btn" onclick="bulkToggle(false)"><i class="fas fa-power-off mr-2"></i>Deactivate All</button>
+                    <button onclick="openAddPlanModal()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        <i class="fas fa-plus mr-2"></i>Add New Plan
+                    </button>
+                    <button onclick="downloadCSV()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        <i class="fas fa-download mr-2"></i>Download CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Plans Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plan Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Data</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Validity</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plansTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Add/Edit Plan Modal -->
+        <div id="planModal" class="modal">
+            <div class="modal-content">
+                <h2 class="text-xl font-bold mb-4" id="modalTitle">Add New Plan</h2>
+                <form id="planForm">
+                    <input type="hidden" id="planId">
+                    <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2">Plan Name</label><input type="text" id="planName" class="w-full p-2 border rounded" required></div>
+                    <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2">Price (₹)</label><input type="number" id="planPrice" class="w-full p-2 border rounded" required></div>
+                    <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2">Data</label><input type="text" id="planData" class="w-full p-2 border rounded" required></div>
+                    <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2">Validity (days)</label><input type="number" id="planValidity" class="w-full p-2 border rounded" required></div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">Category</label>
+                        <select id="planCategory" class="w-full p-2 border rounded" required>
+                            <option value="popular">Popular</option>
+                            <option value="validity">Validity</option>
+                            <option value="data">Data</option>
+                            <option value="unlimited">Unlimited</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="international">International</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="button" onclick="closePlanModal()" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Save Plan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <h2 class="text-xl font-bold mb-4 text-red-600">Confirm Delete</h2>
+                <p class="mb-6">Are you sure you want to delete this plan?</p>
+                <input type="hidden" id="deletePlanId">
+                <div class="flex justify-end">
+                    <button type="button" onclick="closeDeleteModal()" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
+                    <button type="button" onclick="confirmDeletePlan()" class="bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load plans from localStorage or use default (without popularity)
+        let plans = JSON.parse(localStorage.getItem('mobi-comm-plans')) || [
+            { id: 1, name: "Monthly Value Pack", price: 199, data: "1.5GB/day", validity: "28", category: "popular", active: true },
+            { id: 2, name: "5G Unlimited Plan", price: 999, data: "Unlimited Data", validity: "30", category: "unlimited", active: true },
+            { id: 3, name: "Long Validity Plan", price: 1499, data: "2GB/day", validity: "365", category: "validity", active: true },
+        ];
+
+        // Save plans to localStorage
+        function savePlans() {
+            localStorage.setItem('mobi-comm-plans', JSON.stringify(plans));
+        }
+
+        // Update analytics bar
+        function updateAnalytics(filteredPlans) {
+            const totalPlans = filteredPlans.length;
+            const activePlans = filteredPlans.filter(p => p.active).length;
+            const avgPrice = filteredPlans.length ? (filteredPlans.reduce((sum, p) => sum + p.price, 0) / filteredPlans.length).toFixed(2) : 0;
+            document.getElementById("totalPlans").textContent = totalPlans;
+            document.getElementById("activePlans").textContent = activePlans;
+            document.getElementById("avgPrice").textContent = `₹${avgPrice}`;
+        }
+
+        // Display plans in admin table with filtration
+        function displayPlansAdmin() {
+            const tableBody = document.getElementById("plansTableBody");
+            const searchText = document.getElementById("searchPlans").value.toLowerCase();
+            const categoryFilter = document.getElementById("categoryFilter").value;
+            const statusFilter = document.getElementById("statusFilter").value;
+
+            let plansToShow = plans.filter(plan => {
+                const matchesSearch = plan.name.toLowerCase().includes(searchText);
+                const matchesCategory = categoryFilter === "all" || plan.category === categoryFilter;
+                const matchesStatus = statusFilter === "all" || (statusFilter === "active" && plan.active) || (statusFilter === "inactive" && !plan.active);
+                return matchesSearch && matchesCategory && matchesStatus;
+            });
+
+            tableBody.innerHTML = "";
+            plansToShow.forEach(plan => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="px-6 py-4">${plan.name}</td>
+                    <td class="px-6 py-4">₹${plan.price}</td>
+                    <td class="px-6 py-4">${plan.data}</td>
+                    <td class="px-6 py-4">${plan.validity} days</td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs ${getCategoryColor(plan.category)}">${capitalize(plan.category)}</span></td>
+                    <td class="px-6 py-4">
+                        <span class="status-indicator ${plan.active ? 'status-active' : 'status-inactive'}"></span>
+                        <label class="switch">
+                            <input type="checkbox" ${plan.active ? "checked" : ""} onchange="togglePlanStatus(${plan.id}, this.checked)">
+                            <span class="switch-slider"></span>
+                        </label>
+                    </td>
+                    <td class="px-6 py-4 flex space-x-3">
+                        <button onclick="editPlan(${plan.id})" class="action-btn edit-btn" title="Edit Plan"><i class="fas fa-edit"></i></button>
+                        <button onclick="openDeleteModal(${plan.id})" class="action-btn delete-btn" title="Delete Plan"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            updateAnalytics(plansToShow);
+            return plansToShow; // Return filtered plans for CSV
+        }
+
+        // Toggle plan status
+        function togglePlanStatus(planId, isActive) {
+            plans = plans.map(plan => plan.id === planId ? { ...plan, active: isActive } : plan);
+            savePlans();
+            showMessage(`Plan turned ${isActive ? "on" : "off"}!`, "success");
+            displayPlansAdmin();
+        }
+
+        // Bulk toggle plans
+        function bulkToggle(isActive) {
+            plans = plans.map(plan => ({ ...plan, active: isActive }));
+            savePlans();
+            showMessage(`All plans turned ${isActive ? "on" : "off"}!`, "success");
+            displayPlansAdmin();
+        }
+
+        // Category color mapping
+        function getCategoryColor(category) {
+            const colors = {
+                popular: "bg-orange-100 text-orange-800",
+                validity: "bg-green-100 text-green-800",
+                data: "bg-blue-100 text-blue-800",
+                unlimited: "bg-purple-100 text-purple-800",
+                entertainment: "bg-pink-100 text-pink-800",
+                international: "bg-indigo-100 text-indigo-800"
+            };
+            return colors[category] || "bg-gray-100 text-gray-800";
+        }
+
+        // Capitalize text
+        function capitalize(text) {
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        }
+
+        // Open add/edit modal
+        function openAddPlanModal() {
+            document.getElementById("modalTitle").textContent = "Add New Plan";
+            document.getElementById("planForm").reset();
+            document.getElementById("planId").value = "";
+            document.getElementById("planModal").style.display = "block";
+        }
+
+        // Edit plan
+        function editPlan(id) {
+            const plan = plans.find(p => p.id === id);
+            document.getElementById("modalTitle").textContent = "Edit Plan";
+            document.getElementById("planId").value = plan.id;
+            document.getElementById("planName").value = plan.name;
+            document.getElementById("planPrice").value = plan.price;
+            document.getElementById("planData").value = plan.data;
+            document.getElementById("planValidity").value = plan.validity;
+            document.getElementById("planCategory").value = plan.category;
+            document.getElementById("planModal").style.display = "block";
+        }
+
+        // Close add/edit modal
+        function closePlanModal() {
+            document.getElementById("planModal").style.display = "none";
+        }
+
+        // Open delete modal
+        function openDeleteModal(id) {
+            document.getElementById("deletePlanId").value = id;
+            document.getElementById("deleteModal").style.display = "block";
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById("deleteModal").style.display = "none";
+        }
+
+        // Confirm delete
+        function confirmDeletePlan() {
+            const id = parseInt(document.getElementById("deletePlanId").value);
+            plans = plans.filter(plan => plan.id !== id);
+            savePlans();
+            closeDeleteModal();
+            showMessage("Plan deleted!", "success");
+            displayPlansAdmin();
+        }
+
+        // Show notification
+        function showMessage(message, type) {
+            const box = document.createElement("div");
+            box.className = `fixed top-4 right-4 p-4 rounded-md shadow-md ${type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`;
+            box.textContent = message;
+            document.body.appendChild(box);
+            setTimeout(() => box.remove(), 3000);
+        }
+
+        // Handle form submission (removed popularity)
+        function handlePlanFormSubmit(event) {
+            event.preventDefault();
+            const planId = document.getElementById("planId").value;
+            const newPlan = {
+                name: document.getElementById("planName").value,
+                price: parseInt(document.getElementById("planPrice").value),
+                data: document.getElementById("planData").value,
+                validity: document.getElementById("planValidity").value,
+                category: document.getElementById("planCategory").value,
+                active: true
+            };
+            if (planId) {
+                plans = plans.map(plan => plan.id === parseInt(planId) ? { ...plan, ...newPlan } : plan);
+                showMessage("Plan updated!", "success");
+            } else {
+                const newId = plans.length > 0 ? plans[plans.length - 1].id + 1 : 1;
+                plans.push({ id: newId, ...newPlan });
+                showMessage("Plan added!", "success");
+            }
+            savePlans();
+            closePlanModal();
+            displayPlansAdmin();
+        }
+
+        // Download filtered plans as CSV (removed popularity)
+        function downloadCSV() {
+            const filteredPlans = displayPlansAdmin(); // Get the currently filtered plans
+            const headers = ["ID", "Name", "Price", "Data", "Validity", "Category", "Active"];
+            const rows = filteredPlans.map(plan => [
+                plan.id,
+                `"${plan.name}"`, // Quote to handle commas in name
+                plan.price,
+                `"${plan.data}"`, // Quote to handle commas in data
+                plan.validity,
+                plan.category,
+                plan.active ? "Yes" : "No"
+            ]);
+            const csvContent = [
+                headers.join(","),
+                ...rows.map(row => row.join(","))
+            ].join("\n");
+
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `filtered_plans_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            showMessage("Filtered CSV downloaded!", "success");
+        }
+
+        // Initialize page
+        document.addEventListener("DOMContentLoaded", () => {
+            displayPlansAdmin();
+            document.getElementById("planForm").addEventListener("submit", handlePlanFormSubmit);
+            document.getElementById("searchPlans").addEventListener("input", displayPlansAdmin);
+            document.getElementById("categoryFilter").addEventListener("change", displayPlansAdmin);
+            document.getElementById("statusFilter").addEventListener("change", displayPlansAdmin);
+        });
+    </script>
+</body>
+</html>

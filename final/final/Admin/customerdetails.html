@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobi-Comm Admin - Customer Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .sidebar-nav:hover { 
+            background-color: #1e40af; 
+            border-radius: 0.5rem; 
+        }
+
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            z-index: 100; 
+            overflow-y: auto; 
+        }
+
+        .modal-content { 
+            background-color: white; 
+            margin: 5% auto; 
+            padding: 20px; 
+            border-radius: 8px; 
+            width: 80%; 
+            max-width: 700px; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .view-btn { color: #10b981; }
+        .view-btn:hover { background-color: rgba(16, 185, 129, 0.1); }
+        .edit-btn { color: #3b82f6; }
+        .edit-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
+
+        .fixed-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 16rem;
+            height: 100vh;
+            background-color: #1e3a8a;
+            padding: 1rem;
+            transition: transform 0.3s ease-in-out;
+            z-index: 50;
+        }
+
+        .main-content {
+            margin-left: 16rem;
+            padding: 2rem;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        .pagination button:disabled {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+
+        .pagination button.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .details-section {
+            margin-bottom: 20px;
+        }
+
+        .details-section h3 {
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .details-section p {
+            color: #4b5563;
+            margin: 5px 0;
+        }
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .transaction-table th, .transaction-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .transaction-table th {
+            background-color: #f9fafb;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 60;
+            background: #1e3a8a;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Responsive Adjustments */
+        /* Mobile (max-width: 640px) */
+        @media (max-width: 640px) {
+            .fixed-sidebar {
+                transform: translateX(-100%);
+                width: 75%;
+                z-index: 60; /* Increased z-index */
+            }
+            .fixed-sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+                /* Add top padding to prevent header overlap with toggle button */
+                padding-top: 3.5rem;
+            }
+            .mobile-menu-toggle {
+                display: block;
+            }
+            .page-header {
+                /* Give header more breathing room from the toggle button */
+                padding-top: 1rem;
+                padding-left: 3rem; /* Move header text to the right of the toggle button */
+            }
+            .flex-wrap.justify-between {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .space-x-4 {
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+            }
+            .space-x-4 > * {
+                width: 100%;
+                margin-left: 0 !important;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            thead tr th:nth-child(3),
+            tbody tr td:nth-child(3),
+            thead tr th:nth-child(4),
+            tbody tr td:nth-child(4) {
+                display: none; /* Hide Plan and Expiry Date columns */
+            }
+            .modal-content {
+                width: 90%;
+                max-width: 100%;
+                margin: 10% auto;
+                padding: 1rem;
+            }
+            .modal-footer {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .transaction-table {
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Tablet (641px - 1023px) */
+        @media (min-width: 641px) and (max-width: 1023px) {
+            .fixed-sidebar {
+                width: 14rem;
+            }
+            .main-content {
+                margin-left: 14rem;
+                padding: 1.5rem;
+            }
+            .mobile-menu-toggle {
+                display: none;
+            }
+            .flex-wrap.justify-between {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .space-x-4 {
+                flex-direction: row;
+                gap: 1rem;
+            }
+            .space-x-4 > * {
+                width: auto;
+            }
+            table {
+                overflow-x: auto;
+            }
+            .modal-content {
+                width: 85%;
+                max-width: 600px;
+            }
+        }
+
+        /* Desktop (1024px and up) */
+        @media (min-width: 1024px) {
+            .fixed-sidebar {
+                width: 16rem;
+            }
+            .main-content {
+                margin-left: 16rem;
+                padding: 2rem;
+            }
+            .mobile-menu-toggle {
+                display: none;
+            }
+            .flex-wrap.justify-between {
+                flex-direction: row;
+            }
+            .space-x-4 {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Mobile Menu Toggle Button -->
+    <button class="mobile-menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Fixed Sidebar -->
+    <div class="fixed-sidebar">
+        <div class="flex items-center mb-8 mt-2">
+            <img src="admin.jpeg" alt="Mobi-Comm Logo" class="h-8 w-8 mr-2">
+            <span class="text-xl font-bold text-white">Admin Panel</span>
+        </div>
+        <nav class="space-y-4">
+            <a href="admindashboard.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-tachometer-alt w-6"></i><span>Dashboard</span>
+            </a>
+            <a href="plansmanagement.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-list w-6"></i><span>Plans Management</span>
+            </a>
+            <a href="customerdetails.html" class="sidebar-nav flex items-center text-white p-2 rounded bg-blue-900">
+                <i class="fas fa-users w-6"></i><span>Customer Details</span>
+            </a>
+            <a href="ex.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors">
+                <i class="fas fa-bell w-6"></i><span>Expiring Plans Alert</span>
+            </a>
+            <a href="admin-support.html" class="sidebar-nav flex items-center text-white p-2 rounded transition-colors bg-blue-900">
+                <i class="fas fa-headset w-6"></i><span>Support Management</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header with class for mobile styling -->
+        <div class="flex justify-between items-center mb-8 page-header">
+            <h1 class="text-2xl font-bold text-gray-800">Customer Details</h1>
+            <div class="flex items-center space-x-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <i class="fas fa-sign-out-alt mr-2"></i><a href="index.html" class="text-white">Logout</a>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex flex-wrap justify-between items-center gap-4">
+                <div class="flex flex-wrap space-x-4 items-center">
+                    <input type="text" id="searchCustomers" placeholder="Search by name..." class="p-2 border rounded-md">
+                    <select id="planFilter" class="p-2 border rounded-md">
+                        <option value="all">All Plans</option>
+                        <option value="Monthly Value Pack">Monthly Value Pack</option>
+                        <option value="5G Unlimited Plan">5G Unlimited Plan</option>
+                        <option value="Long Validity Plan">Long Validity Plan</option>
+                        <option value="Basic Validity Extension">Basic Validity Extension</option>
+                        <option value="Premium Data Pack">Premium Data Pack</option>
+                        <option value="Daily Data Booster">Daily Data Booster</option>
+                        <option value="Entertainment Plus Pack">Entertainment Plus Pack</option>
+                        <option value="International Roaming">International Roaming</option>
+                        <option value="Family Unlimited Pack">Family Unlimited Pack</option>
+                        <option value="Weekend Data Blast">Weekend Data Blast</option>
+                    </select>
+                    <select id="statusFilter" class="p-2 border rounded-md">
+                        <option value="all">All Statuses</option>
+                        <option value="active">Active</option>
+                        <option value="expired">Expired</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="openAddCustomerModal()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        <i class="fas fa-plus mr-2"></i>Add New Customer
+                    </button>
+                    <button onclick="downloadCSV()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        <i class="fas fa-download mr-2"></i>Download CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Table -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Customer List</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plan</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expiry Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+
+        <!-- Add/Edit Customer Modal -->
+        <div id="customerModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="text-xl font-bold text-gray-800" id="customerModalTitle">Add New Customer</h2>
+                </div>
+                <form id="customerForm">
+                    <input type="hidden" id="customerId">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-semibold mb-2">Customer Name</label>
+                        <input type="text" id="customerName" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-semibold mb-2">Phone Number</label>
+                        <input type="text" id="customerPhone" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-semibold mb-2">Assigned Plan</label>
+                        <select id="customerPlan" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="Monthly Value Pack">Monthly Value Pack</option>
+                            <option value="5G Unlimited Plan">5G Unlimited Plan</option>
+                            <option value="Long Validity Plan">Long Validity Plan</option>
+                            <option value="Basic Validity Extension">Basic Validity Extension</option>
+                            <option value="Premium Data Pack">Premium Data Pack</option>
+                            <option value="Daily Data Booster">Daily Data Booster</option>
+                            <option value="Entertainment Plus Pack">Entertainment Plus Pack</option>
+                            <option value="International Roaming">International Roaming</option>
+                            <option value="Family Unlimited Pack">Family Unlimited Pack</option>
+                            <option value="Weekend Data Blast">Weekend Data Blast</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-semibold mb-2">Expiry Date</label>
+                        <input type="date" id="customerExpiry" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" onclick="closeCustomerModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save Customer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- View Customer Recharge History Modal -->
+        <div id="viewCustomerModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="text-xl font-bold text-gray-800" id="viewCustomerTitle">Customer Recharge History</h2>
+                </div>
+                <div class="details-section">
+                    <p><strong>Name:</strong> <span id="viewName"></span></p>
+                    <p><strong>Phone:</strong> <span id="viewPhone"></span></p>
+                    <p><strong>Current Plan:</strong> <span id="viewPlan"></span></p>
+                    <p><strong>Expiry Date:</strong> <span id="viewExpiry"></span></p>
+                </div>
+                <div class="details-section">
+                    <h3>Previous Recharges</h3>
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Plan</th>
+                                <th>Amount</th>
+                                <th>Payment Mode</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viewTransactions"></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeViewCustomerModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Load customers from localStorage or use Raj's static details
+    let customers = JSON.parse(localStorage.getItem('mobi-comm-customers')) || [
+        { 
+            id: 1, 
+            name: "Raj", 
+            phone: "+91 98765 43210", 
+            email: "Raj.doe@example.com", 
+            plan: "Monthly Value Pack", 
+            activated: "2025-02-15", 
+            expiry: "2025-03-15", 
+            transactions: [
+                { date: "2025-02-15", plan: "Monthly Value Pack", amount: 199, paymentMode: "UPI", status: "Successful" },
+                { date: "2025-01-15", plan: "Monthly Value Pack", amount: 199, paymentMode: "Credit Card", status: "Successful" }
+            ]
+        }
+    ];
+
+    const itemsPerPage = 5;
+    let currentPage = 1;
+
+    // Save customers to localStorage
+    function saveCustomersToStorage() {
+        localStorage.setItem('mobi-comm-customers', JSON.stringify(customers));
+    }
+
+    // Filter and paginate customers
+    function filterAndPaginateCustomers() {
+        const searchText = document.getElementById("searchCustomers").value.toLowerCase();
+        const planFilter = document.getElementById("planFilter").value;
+        const statusFilter = document.getElementById("statusFilter").value;
+        const today = new Date().toISOString().split('T')[0];
+
+        let filteredCustomers = customers.filter(customer => {
+            const matchesSearch = customer.name.toLowerCase().includes(searchText);
+            const matchesPlan = planFilter === "all" || customer.plan === planFilter;
+            const matchesStatus = statusFilter === "all" || 
+                                 (statusFilter === "active" && customer.expiry >= today) || 
+                                 (statusFilter === "expired" && customer.expiry < today);
+            return matchesSearch && matchesPlan && matchesStatus;
+        });
+
+        const totalItems = filteredCustomers.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedCustomers = filteredCustomers.slice(startIndex, endIndex);
+
+        displayCustomers(paginatedCustomers);
+        updatePagination(totalPages);
+        return filteredCustomers; // Return all filtered customers for CSV
+    }
+
+    // Display customers in the table
+    function displayCustomers(customersToShow) {
+        const tableBody = document.getElementById("customerTableBody");
+        tableBody.innerHTML = "";
+        customersToShow.forEach(customer => {
+            let row = document.createElement("tr");
+            row.innerHTML = `
+                <td class="px-6 py-4">${customer.name}</td>
+                <td class="px-6 py-4">${customer.phone}</td>
+                <td class="px-6 py-4">${customer.plan}</td>
+                <td class="px-6 py-4">${customer.expiry}</td>
+                <td class="px-6 py-4 flex space-x-3">
+                    <button onclick="viewCustomer(${customer.id})" class="action-btn view-btn" title="View Recharge History"><i class="fas fa-eye"></i></button>
+                    <button onclick="editCustomer(${customer.id})" class="action-btn edit-btn" title="Edit Customer"><i class="fas fa-edit"></i></button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Update pagination controls
+    function updatePagination(totalPages) {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+        
+        const prevButton = document.createElement("button");
+        prevButton.textContent = "Previous";
+        prevButton.disabled = currentPage === 1;
+        prevButton.onclick = () => { if (currentPage > 1) { currentPage--; filterAndPaginateCustomers(); } };
+        pagination.appendChild(prevButton);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const pageButton = document.createElement("button");
+            pageButton.textContent = i;
+            pageButton.classList.toggle("active", i === currentPage);
+            pageButton.onclick = () => { currentPage = i; filterAndPaginateCustomers(); };
+            pagination.appendChild(pageButton);
+        }
+
+        const nextButton = document.createElement("button");
+        nextButton.textContent = "Next";
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.onclick = () => { if (currentPage < totalPages) { currentPage++; filterAndPaginateCustomers(); } };
+        pagination.appendChild(nextButton);
+    }
+
+    // Open add/edit customer modal
+    function openAddCustomerModal() {
+        document.getElementById("customerModalTitle").textContent = "Add New Customer";
+        document.getElementById("customerForm").reset();
+        document.getElementById("customerId").value = "";
+        document.getElementById("customerModal").style.display = "block";
+    }
+
+    // Edit customer
+    function editCustomer(id) {
+        const customer = customers.find(c => c.id === id);
+        document.getElementById("customerModalTitle").textContent = "Edit Customer Details";
+        document.getElementById("customerId").value = customer.id;
+        document.getElementById("customerName").value = customer.name;
+        document.getElementById("customerPhone").value = customer.phone;
+        document.getElementById("customerPlan").value = customer.plan;
+        document.getElementById("customerExpiry").value = customer.expiry;
+        document.getElementById("customerModal").style.display = "block";
+    }
+
+    // Close add/edit modal
+    function closeCustomerModal() {
+        document.getElementById("customerModal").style.display = "none";
+    }
+
+    // View customer recharge history
+    function viewCustomer(id) {
+        const customer = customers.find(c => c.id === id);
+        if (!customer) {
+            showMessage("Customer not found!", "error");
+            return;
+        }
+
+        document.getElementById("viewCustomerTitle").textContent = `${customer.name}'s Recharge History`;
+        document.getElementById("viewName").textContent = customer.name;
+        document.getElementById("viewPhone").textContent = customer.phone;
+        document.getElementById("viewPlan").textContent = customer.plan;
+        document.getElementById("viewExpiry").textContent = customer.expiry;
+
+        const transactionBody = document.getElementById("viewTransactions");
+        transactionBody.innerHTML = "";
+        if (customer.transactions && customer.transactions.length > 0) {
+            customer.transactions.forEach(tx => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${tx.date}</td>
+                    <td>${tx.plan}</td>
+                    <td>₹${tx.amount}</td>
+                    <td>${tx.paymentMode}</td>
+                    <td>${tx.status}</td>
+                `;
+                transactionBody.appendChild(row);
+            });
+        } else {
+            let row = document.createElement("tr");
+            row.innerHTML = `<td colspan="5" class="text-center">No recharge history available</td>`;
+            transactionBody.appendChild(row);
+        }
+
+        document.getElementById("viewCustomerModal").style.display = "block";
+    }
+
+    // Close view modal
+    function closeViewCustomerModal() {
+        document.getElementById("viewCustomerModal").style.display = "none";
+    }
+
+    // Form submission handler (static transactions for new customers)
+    document.getElementById("customerForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        let customerId = document.getElementById("customerId").value;
+        let newCustomer = {
+            name: document.getElementById("customerName").value,
+            phone: document.getElementById("customerPhone").value,
+            plan: document.getElementById("customerPlan").value,
+            expiry: document.getElementById("customerExpiry").value,
+            email: customerId ? customers.find(c => c.id === parseInt(customerId)).email : `${document.getElementById("customerName").value.toLowerCase().replace(" ", ".")}@example.com`,
+            activated: customerId ? customers.find(c => c.id === parseInt(customerId)).activated : "2025-02-15",
+            transactions: customerId ? customers.find(c => c.id === parseInt(customerId)).transactions : [
+                { date: "2025-02-15", plan: "Monthly Value Pack", amount: 199, paymentMode: "UPI", status: "Successful" },
+                { date: "2025-01-15", plan: "Monthly Value Pack", amount: 199, paymentMode: "Credit Card", status: "Successful" }
+            ]
+        };
+        if (customerId) {
+            for (let i = 0; i < customers.length; i++) {
+                if (customers[i].id === parseInt(customerId)) {
+                    customers[i] = { id: customers[i].id, ...newCustomer };
+                    showMessage("Customer updated successfully!", "success");
+                    break;
+                }
+            }
+        } else {
+            let newId = customers.length > 0 ? customers[customers.length - 1].id + 1 : 1;
+            customers.push({ id: newId, ...newCustomer });
+            showMessage("New customer added successfully!", "success");
+        }
+        closeCustomerModal();
+        filterAndPaginateCustomers();
+        saveCustomersToStorage();
+    });
+
+    // Download filtered customers as CSV with all previous recharges
+    function downloadCSV() {
+        try {
+            const filteredCustomers = filterAndPaginateCustomers(); // Get all filtered customers
+            if (filteredCustomers.length === 0) {
+                showMessage("No matching customers to export!", "error");
+                return;
+            }
+
+            const maxTransactions = Math.max(...filteredCustomers.map(c => c.transactions ? c.transactions.length : 0));
+            const baseHeaders = ["ID", "Name", "Phone", "Email", "Plan", "Activated", "Expiry"];
+            const transactionHeaders = [];
+            for (let i = 1; i <= maxTransactions; i++) {
+                transactionHeaders.push(
+                    `Recharge ${i} Date`,
+                    `Recharge ${i} Plan`,
+                    `Recharge ${i} Amount`,
+                    `Recharge ${i} Payment Mode`,
+                    `Recharge ${i} Status`
+                );
+            }
+            const headers = [...baseHeaders, ...transactionHeaders];
+
+            const rows = filteredCustomers.map(customer => {
+                const baseRow = [
+                    customer.id,
+                    `"${(customer.name || '').replace(/"/g, '""')}"`,
+                    `"${(customer.phone || '').replace(/"/g, '""')}"`,
+                    `"${(customer.email || '').replace(/"/g, '""')}"`,
+                    `"${(customer.plan || '').replace(/"/g, '""')}"`,
+                    customer.activated || "",
+                    customer.expiry || ""
+                ];
+                const transactionRow = [];
+                for (let i = 0; i < maxTransactions; i++) {
+                    const tx = customer.transactions && customer.transactions[i] ? customer.transactions[i] : {};
+                    transactionRow.push(
+                        tx.date || "",
+                        tx.plan ? `"${tx.plan.replace(/"/g, '""')}"` : "",
+                        tx.amount || "",
+                        tx.paymentMode ? `"${tx.paymentMode.replace(/"/g, '""')}"` : "",
+                        tx.status ? `"${tx.status.replace(/"/g, '""')}"` : ""
+                    );
+                }
+                return [...baseRow, ...transactionRow];
+            });
+
+            const csvContent = [
+                headers.join(","),
+                ...rows.map(row => row.join(","))
+            ].join("\n");
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "customer-details.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showMessage("Customer data exported successfully!", "success");
+        } catch (error) {
+            console.error("Error exporting data:", error);
+            showMessage("Error exporting data. Please try again.", "error");
+        }
+    }
+
+    // Show success/error messages (toast-style)
+    function showMessage(message, type = "success") {
+        const toast = document.createElement("div");
+        toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white ${type === "success" ? "bg-green-600" : "bg-red-600"} shadow-lg z-50`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add("opacity-0", "transition-opacity", "duration-500");
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 500);
+        }, 3000);
+    }
+
+    // Mobile menu toggle functionality
+    document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
+        document.querySelector('.fixed-sidebar').classList.toggle('show');
+    });
+
+    // Handle clicks outside the sidebar to close it on mobile
+    document.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('.fixed-sidebar');
+        const toggleButton = document.querySelector('.mobile-menu-toggle');
+        
+        if (window.innerWidth <= 640 && 
+            sidebar.classList.contains('show') && 
+            !sidebar.contains(event.target) && 
+            !toggleButton.contains(event.target)) {
+            sidebar.classList.remove('show');
+        }
+    });
+
+    // Add event listeners to the filter controls
+    document.getElementById("searchCustomers").addEventListener("input", function() {
+        currentPage = 1; // Reset to first page on search
+        filterAndPaginateCustomers();
+    });
+    
+    document.getElementById("planFilter").addEventListener("change", function() {
+        currentPage = 1; // Reset to first page on filter change
+        filterAndPaginateCustomers();
+    });
+    
+    document.getElementById("statusFilter").addEventListener("change", function() {
+        currentPage = 1; // Reset to first page on filter change
+        filterAndPaginateCustomers();
+    });
+
+    // Generate random sample data if needed (for development/testing)
+    function generateSampleData(count = 20) {
+        const names = ["Rahul", "Priya", "Amit", "Neha", "Vikram", "Anjali", "Ravi", "Pooja", "Sanjay", "Meena", "Deepak"];
+        const plans = ["Monthly Value Pack", "5G Unlimited Plan", "Long Validity Plan", "Basic Validity Extension", "Premium Data Pack"];
+        const paymentModes = ["UPI", "Credit Card", "Debit Card", "Net Banking", "Wallet"];
+        
+        let sampleCustomers = [];
+        for (let i = 1; i <= count; i++) {
+            const name = names[Math.floor(Math.random() * names.length)];
+            const lastName = ["Kumar", "Sharma", "Singh", "Patel", "Verma", "Gupta"][Math.floor(Math.random() * 6)];
+            const plan = plans[Math.floor(Math.random() * plans.length)];
+            
+            // Generate random dates within the last year
+            const today = new Date();
+            const activatedDate = new Date(today);
+            activatedDate.setDate(today.getDate() - Math.floor(Math.random() * 365));
+            
+            const expiryDate = new Date(activatedDate);
+            expiryDate.setDate(activatedDate.getDate() + 30 + Math.floor(Math.random() * 60));
+            
+            // Format dates as YYYY-MM-DD
+            const formattedActivated = activatedDate.toISOString().split('T')[0];
+            const formattedExpiry = expiryDate.toISOString().split('T')[0];
+            
+            // Generate 1-3 random transactions
+            const txCount = 1 + Math.floor(Math.random() * 3);
+            let transactions = [];
+            
+            for (let j = 0; j < txCount; j++) {
+                const txDate = new Date(activatedDate);
+                txDate.setDate(activatedDate.getDate() - (j * 30));
+                transactions.push({
+                    date: txDate.toISOString().split('T')[0],
+                    plan: plan,
+                    amount: 199 + Math.floor(Math.random() * 800),
+                    paymentMode: paymentModes[Math.floor(Math.random() * paymentModes.length)],
+                    status: Math.random() > 0.1 ? "Successful" : "Failed"
+                });
+            }
+            
+            sampleCustomers.push({
+                id: i,
+                name: `${name} ${lastName}`,
+                phone: `+91 ${Math.floor(Math.random() * 10000000000).toString().padStart(10, '0')}`,
+                email: `${name.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+                plan: plan,
+                activated: formattedActivated,
+                expiry: formattedExpiry,
+                transactions: transactions
+            });
+        }
+        
+        return sampleCustomers;
+    }
+
+    // Uncomment to generate sample data
+    /*
+    if (customers.length <= 1) {
+        customers = generateSampleData(25);
+        saveCustomersToStorage();
+    }
+    */
+
+    // Initialize the page
+    document.addEventListener("DOMContentLoaded", function() {
+        filterAndPaginateCustomers();
+    });
+</script>
+</body>
+</html>
