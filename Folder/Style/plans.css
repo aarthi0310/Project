@@ -1,52 +1,47 @@
-.hero-gradient { 
-    background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%); 
+.hero-gradient {
+    background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
 }
-
-.selected-plan { 
-    border-color: #2563eb; 
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5); 
-    background-color: #f0f9ff; 
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
+    z-index: 50;
 }
-
-.plan-row:hover { 
-    background-color: #f0f7ff; 
+.dropdown-menu.show {
+    display: block;
 }
-
-.filter-button { 
-    background-color: #ffffff; 
-    color: #1a365d; 
+.plan-highlight {
+    background-color: #f0f9ff;
+    border-left: 4px solid #2563eb;
 }
-
-.filter-button.active, 
-.filter-button:hover { 
-    background-color: #2563eb; 
-    color: white; 
+.payment-option:hover {
+    background-color: #f0f7ff;
+    border-color: #2563eb;
 }
-
-.hidden { 
-    display: none; 
+.payment-option.selected {
+    background-color: #f0f7ff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
 }
-
-.badge-popular { 
-    background-color: #ef4444; 
-    color: white; 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
-
-.dropdown-menu { 
-    display: none; 
-    position: absolute; 
-    right: 0; 
-    top: 100%; 
-    background-color: white; 
-    min-width: 160px; 
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
-    border-radius: 0.5rem; 
-    margin-top: 0.5rem; 
-    z-index: 50; 
+.animate-fadeIn {
+    animation: fadeIn 0.5s ease-in-out;
 }
-
-.dropdown-menu.show { 
-    display: block; 
+.payment-form {
+    display: none;
+}
+.payment-form.active {
+    display: block;
+    animation: fadeIn 0.5s ease-in-out;
 }
 
 /* Responsive Adjustments */
@@ -60,22 +55,26 @@
         left: 0;
         background-color: white;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 0.5rem 0;
+        z-index: 40;
     }
     .nav-links.show {
         display: flex;
     }
-    .filter-button {
+    .nav-links a, .nav-links .relative {
+        padding: 0.75rem 1rem;
         width: 100%;
-        margin-bottom: 0.5rem;
-        padding: 0.75rem;
-        font-size: 0.875rem;
+        text-align: left;
     }
-    .plans-table th, .plans-table td {
-        font-size: 0.75rem;
-        padding: 0.5rem;
+    .dropdown-menu {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        border-radius: 0;
     }
-    .plans-table th:nth-child(3), .plans-table td:nth-child(3) { /* Hide Data column */
-        display: none;
+    .hero-gradient {
+        padding-top: 6rem;
+        padding-bottom: 2rem;
     }
     .hero-gradient h1 {
         font-size: 1.5rem;
@@ -83,16 +82,49 @@
     .hero-gradient p {
         font-size: 0.875rem;
     }
+    #selected-plan-container, .p-6 {
+        padding: 1rem;
+    }
+    #selected-plan-container h2 {
+        font-size: 1.25rem;
+    }
+    .plan-highlight {
+        padding: 1rem;
+    }
+    .payment-option {
+        padding: 1rem;
+    }
+    .payment-option h3 {
+        font-size: 1rem;
+    }
+    .payment-option p {
+        font-size: 0.875rem;
+    }
+    .payment-form {
+        padding: 1rem;
+    }
+    .payment-form h3 {
+        font-size: 1rem;
+    }
+    .payment-form input, .payment-form select {
+        font-size: 0.875rem;
+    }
+    .payment-form button {
+        width: 100%;
+        padding: 0.75rem;
+    }
 }
 
 @media (min-width: 641px) and (max-width: 1023px) { /* Tablet */
-    .filter-button {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
+    .nav-links {
+        display: flex;
     }
-    .plans-table th, .plans-table td {
-        font-size: 0.875rem;
-        padding: 0.75rem;
+    .mobile-menu-button {
+        display: none;
+    }
+    .hero-gradient {
+        padding-top: 7rem;
+        padding-bottom: 2.5rem;
     }
     .hero-gradient h1 {
         font-size: 2rem;
@@ -100,10 +132,28 @@
     .hero-gradient p {
         font-size: 1rem;
     }
+    #selected-plan-container, .p-6 {
+        padding: 1.5rem;
+    }
+    #selected-plan-container h2 {
+        font-size: 1.5rem;
+    }
+    .payment-option {
+        padding: 1.5rem;
+    }
+    .payment-form {
+        padding: 1.5rem;
+    }
+    .payment-form h3 {
+        font-size: 1.125rem;
+    }
 }
 
 @media (min-width: 1024px) { /* Desktop */
     .mobile-menu-button {
         display: none;
+    }
+    .nav-links {
+        display: flex;
     }
 }

@@ -1,201 +1,240 @@
-// plansmanagement.js
 const API_URL = "http://localhost:8081/api/plans";
 
-async function fetchWithToken(url, options = {}) {
-    options.headers = {
-        ...options.headers,
-        'Content-Type': 'application/json'
-    };
-    return fetch(url, options);
-}
+let currentPage = 0;
+const itemsPerPage = 5;
 
-async function fetchPlans() {
-    const response = await fetchWithToken(API_URL);
-    return await response.json();
-}
-
-async function fetchAnalytics() {
-    const response = await fetchWithToken(`${API_URL}/analytics`);
-    return await response.json();
-}
-
-async function savePlan(plan) {
-    const method = plan.id ? "PUT" : "POST";
-    const url = plan.id ? `${API_URL}/${plan.id}` : API_URL;
-    const response = await fetchWithToken(url, {
-        method: method,
-        body: JSON.stringify(plan),
-    });
-    return await response.json();
-}
-
-async function deletePlan(id) {
-    const response = await fetchWithToken(`${API_URL}/${id}`, { method: "DELETE" });
-    if (!response.ok) throw new Error("Failed to delete plan");
-}
-
-async function togglePlanStatus(planId) {
-    const response = await fetchWithToken(`${API_URL}/${planId}/toggle`, { method: "PUT" });
-    return await response.json();
-}
-
-async function bulkToggle(isActive) {
-    const response = await fetchWithToken(`${API_URL}/bulk-toggle?active=${isActive}`, { method: "PUT" });
-    return await response.json();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    displayPlansAdmin();
-    document.getElementById("planForm").addEventListener("submit", handlePlanFormSubmit);
-    document.getElementById("searchPlans").addEventListener("input", displayPlansAdmin);
-    document.getElementById("categoryFilter").addEventListener("change", displayPlansAdmin);
-    document.getElementById("statusFilter").addEventListener("change", displayPlansAdmin);
-    document.querySelector('.mobile-menu-toggle').addEventListener('click', () => {
-        document.querySelector('.fixed-sidebar').classList.toggle('show');
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    loadPlans();
+    loadAnalytics();
+    setupEventListeners();
+    setupMobileMenu();
 });
 
-async function displayPlansAdmin() {
-    const plans = await fetchPlans();
-    const analytics = await fetchAnalytics();
-    const tableBody = document.getElementById("plansTableBody");
-    const searchText = document.getElementById("searchPlans").value.toLowerCase();
-    const categoryFilter = document.getElementById("categoryFilter").value;
-    const statusFilter = document.getElementById("statusFilter").value;
-
-    let plansToShow = plans.filter(plan => {
-        const matchesSearch = plan.name.toLowerCase().includes(searchText);
-        const matchesCategory = categoryFilter === "all" || plan.category === categoryFilter;
-        const matchesStatus = statusFilter === "all" || 
-            (statusFilter === "active" && plan.active) || 
-            (statusFilter === "inactive" && !plan.active);
-        return matchesSearch && matchesCategory && matchesStatus;
-    });
-
-    tableBody.innerHTML = "";
-    plansToShow.forEach(plan => {
-        let row = document.createElement("tr");
-        row.innerHTML = `
-            <td class="px-6 py-4">${plan.name}</td>
-            <td class="px-6 py-4">₹${plan.price}</td>
-            <td class="px-6 py-4">${plan.data}</td>
-            <td class="px-6 py-4">${plan.validity} days</td>
-            <td class="px-6 py-4"><span class="px-2 py-1 rounded-full text-xs ${getCategoryColor(plan.category)}">${capitalize(plan.category)}</span></td>
-            <td class="px-6 py-4">
-                <span class="status-indicator ${plan.active ? 'status-active' : 'status-inactive'}"></span>
-                <label class="switch">
-                    <input type="checkbox" ${plan.active ? "checked" : ""} onchange="togglePlanStatus(${plan.id})">
-                    <span class="switch-slider"></span>
-                </label>
-            </td>
-            <td class="px-6 py-4 flex space-x-3">
-                <button onclick="editPlan(${plan.id})" class="action-btn edit-btn" title="Edit Plan"><i class="fas fa-edit"></i></button>
-                <button onclick="openDeleteModal(${plan.id})" class="action-btn delete-btn" title="Delete Plan"><i class="fas fa-trash-alt"></i></button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-    updateAnalytics(analytics);
+function setupEventListeners() {
+    document.getElementById('searchPlans').addEventListener('input', () => loadPlans(0));
+    document.getElementById('categoryFilter').addEventListener('change', () => loadPlans(0));
+    document.getElementById('statusFilter').addEventListener('change', () => loadPlans(0));
+    document.getElementById('planForm').addEventListener('submit', savePlan);
+    document.getElementById('prevPage').addEventListener('click', () => loadPlans(currentPage - 1));
+    document.getElementById('nextPage').addEventListener('click', () => loadPlans(currentPage + 1));
+    document.getElementById('planCategory').addEventListener('change', toggleCustomCategory);
 }
 
-function getCategoryColor(category) {
-    const colors = {
-        popular: "bg-orange-100 text-orange-800",
-        validity: "bg-green-100 text-green-800",
-        data: "bg-blue-100 text-blue-800",
-        unlimited: "bg-purple-100 text-purple-800",
-        entertainment: "bg-pink-100 text-pink-800",
-        international: "bg-indigo-100 text-indigo-800"
-    };
-    return colors[category] || "bg-gray-100 text-gray-800";
+function setupMobileMenu() {
+    const toggleButton = document.querySelector('.mobile-menu-toggle');
+    const sidebar = document.querySelector('.fixed-sidebar');
+    toggleButton.addEventListener('click', () => sidebar.classList.toggle('show'));
 }
 
-function capitalize(text) {
-    return text.charAt(0).toUpperCase() + text.slice(1);
+async function loadPlans(page = currentPage) {
+    const search = document.getElementById('searchPlans').value;
+    const category = document.getElementById('categoryFilter').value === 'all' ? '' : document.getElementById('categoryFilter').value;
+    const status = document.getElementById('statusFilter').value === 'all' ? '' : document.getElementById('statusFilter').value;
+
+    try {
+        const response = await fetch(`${API_URL}?page=${page}&size=${itemsPerPage}&search=${search}&category=${category}&status=${status}`);
+        const data = await response.json();
+        currentPage = data.number;
+
+        const tbody = document.getElementById('plansTableBody');
+        tbody.innerHTML = '';
+        data.content.forEach(plan => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">${plan.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap">₹${plan.price}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${plan.data}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${plan.validity}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${plan.category}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-indicator ${plan.active ? 'status-active' : 'status-inactive'}"></span>
+                    ${plan.active ? 'Active' : 'Inactive'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <button class="action-btn edit-btn" onclick="openEditPlanModal(${plan.id})"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete-btn" onclick="openDeleteModal(${plan.id})"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn" onclick="togglePlanStatus(${plan.id})"><i class="fas fa-power-off"></i></button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        updatePagination(data.totalPages);
+    } catch (error) {
+        console.error('Error loading plans:', error);
+    }
 }
 
-function updateAnalytics(analytics) {
-    document.getElementById("totalPlans").textContent = analytics.totalPlans;
-    document.getElementById("activePlans").textContent = analytics.activePlans;
-    document.getElementById("avgPrice").textContent = `₹${analytics.averagePrice.toFixed(2)}`;
+async function loadAnalytics() {
+    try {
+        const response = await fetch(`${API_URL}/analytics`);
+        const data = await response.json();
+        document.getElementById('totalPlans').textContent = data.totalPlans;
+        document.getElementById('activePlans').textContent = data.activePlans;
+        document.getElementById('avgPrice').textContent = `₹${data.averagePrice.toFixed(2)}`;
+    } catch (error) {
+        console.error('Error loading analytics:', error);
+    }
+}
+
+function updatePagination(totalPages) {
+    const prevButton = document.getElementById('prevPage');
+    const nextButton = document.getElementById('nextPage');
+    const paginationNumbers = document.getElementById('paginationNumbers');
+
+    prevButton.disabled = currentPage === 0;
+    nextButton.disabled = currentPage >= totalPages - 1;
+
+    paginationNumbers.innerHTML = '';
+    for (let i = 0; i < totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i + 1;
+        btn.className = `px-3 py-1 rounded ${i === currentPage ? 'bg-blue-600 text-white' : 'bg-gray-200'}`;
+        btn.addEventListener('click', () => loadPlans(i));
+        paginationNumbers.appendChild(btn);
+    }
 }
 
 function openAddPlanModal() {
-    document.getElementById("modalTitle").textContent = "Add New Plan";
-    document.getElementById("planForm").reset();
-    document.getElementById("planId").value = "";
-    document.getElementById("planModal").style.display = "block";
+    document.getElementById('modalTitle').textContent = 'Add New Plan';
+    document.getElementById('planId').value = '';
+    document.getElementById('planForm').reset();
+    document.getElementById('planModal').style.display = 'block';
 }
 
-async function editPlan(id) {
-    const plans = await fetchPlans();
-    const plan = plans.find(p => p.id === id);
-    document.getElementById("modalTitle").textContent = "Edit Plan";
-    document.getElementById("planId").value = plan.id;
-    document.getElementById("planName").value = plan.name;
-    document.getElementById("planPrice").value = plan.price;
-    document.getElementById("planData").value = plan.data;
-    document.getElementById("planValidity").value = plan.validity;
-    document.getElementById("planCategory").value = plan.category;
-    document.getElementById("planModal").style.display = "block";
+async function openEditPlanModal(id) {
+    try {
+        const response = await fetch(`${API_URL}/${id}`);
+        const plan = await response.json();
+        document.getElementById('modalTitle').textContent = 'Edit Plan';
+        document.getElementById('planId').value = plan.id;
+        document.getElementById('planName').value = plan.name;
+        document.getElementById('planPrice').value = plan.price;
+        document.getElementById('planData').value = plan.data;
+        document.getElementById('planValidity').value = plan.validity;
+        document.getElementById('planCategory').value = plan.category === 'custom' ? 'custom' : plan.category;
+        document.getElementById('customCategory').value = plan.category === 'custom' ? plan.category : '';
+        document.getElementById('planModal').style.display = 'block';
+        toggleCustomCategory();
+    } catch (error) {
+        console.error('Error fetching plan:', error);
+    }
 }
 
 function closePlanModal() {
-    document.getElementById("planModal").style.display = "none";
+    document.getElementById('planModal').style.display = 'none';
+}
+
+async function savePlan(e) {
+    e.preventDefault();
+    const id = document.getElementById('planId').value;
+    const categorySelect = document.getElementById('planCategory').value;
+    const customCategory = document.getElementById('customCategory').value;
+    const plan = {
+        name: document.getElementById('planName').value,
+        price: parseFloat(document.getElementById('planPrice').value),
+        data: document.getElementById('planData').value,
+        validity: document.getElementById('planValidity').value,
+        category: categorySelect === 'custom' ? customCategory : categorySelect,
+        active: true // Default to active for new plans
+    };
+
+    try {
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${API_URL}/${id}` : API_URL;
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(plan)
+        });
+        if (response.ok) {
+            closePlanModal();
+            loadPlans();
+            loadAnalytics();
+        } else {
+            console.error('Error saving plan:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error saving plan:', error);
+    }
 }
 
 function openDeleteModal(id) {
-    document.getElementById("deletePlanId").value = id;
-    document.getElementById("deleteModal").style.display = "block";
+    document.getElementById('deletePlanId').value = id;
+    document.getElementById('deleteModal').style.display = 'block';
 }
 
 function closeDeleteModal() {
-    document.getElementById("deleteModal").style.display = "none";
+    document.getElementById('deleteModal').style.display = 'none';
 }
 
 async function confirmDeletePlan() {
-    const id = parseInt(document.getElementById("deletePlanId").value);
-    await deletePlan(id);
-    closeDeleteModal();
-    showMessage("Plan deleted!", "success");
-    displayPlansAdmin();
+    const id = document.getElementById('deletePlanId').value;
+    try {
+        const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            closeDeleteModal();
+            loadPlans();
+            loadAnalytics();
+        } else {
+            console.error('Error deleting plan:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error deleting plan:', error);
+    }
 }
 
-async function handlePlanFormSubmit(event) {
-    event.preventDefault();
-    const planId = document.getElementById("planId").value;
-    const newPlan = {
-        id: planId ? parseInt(planId) : null,
-        name: document.getElementById("planName").value,
-        price: parseFloat(document.getElementById("planPrice").value),
-        data: document.getElementById("planData").value,
-        validity: document.getElementById("planValidity").value,
-        category: document.getElementById("planCategory").value,
-        active: true
-    };
-    await savePlan(newPlan);
-    showMessage(planId ? "Plan updated!" : "Plan added!", "success");
-    closePlanModal();
-    displayPlansAdmin();
+async function togglePlanStatus(id) {
+    try {
+        const response = await fetch(`${API_URL}/${id}/toggle`, { method: 'PUT' });
+        if (response.ok) {
+            loadPlans();
+            loadAnalytics();
+        } else {
+            console.error('Error toggling plan status:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error toggling plan status:', error);
+    }
+}
+
+async function bulkToggle(active) {
+    try {
+        const response = await fetch(`${API_URL}/bulk-toggle?active=${active}`, { method: 'PUT' });
+        if (response.ok) {
+            loadPlans();
+            loadAnalytics();
+        } else {
+            console.error('Error bulk toggling plans:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error bulk toggling plans:', error);
+    }
 }
 
 async function downloadCSV() {
-    const response = await fetchWithToken(`${API_URL}/export-csv`);
-    const csvContent = await response.text();
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `plans_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-    showMessage("CSV downloaded!", "success");
+    const search = document.getElementById('searchPlans').value;
+    const category = document.getElementById('categoryFilter').value === 'all' ? '' : document.getElementById('categoryFilter').value;
+    const status = document.getElementById('statusFilter').value === 'all' ? '' : document.getElementById('statusFilter').value;
+
+    try {
+        const response = await fetch(`${API_URL}/export-csv?search=${search}&category=${category}&status=${status}`);
+        const csv = await response.text();
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'plans.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error downloading CSV:', error);
+    }
 }
 
-function showMessage(message, type) {
-    const box = document.createElement("div");
-    box.className = `fixed top-4 right-4 p-4 rounded-md shadow-md ${type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`;
-    box.textContent = message;
-    document.body.appendChild(box);
-    setTimeout(() => box.remove(), 3000);
+function toggleCustomCategory() {
+    const categorySelect = document.getElementById('planCategory').value;
+    const customInput = document.getElementById('customCategory');
+    customInput.disabled = categorySelect !== 'custom';
+    if (categorySelect !== 'custom') customInput.value = '';
 }

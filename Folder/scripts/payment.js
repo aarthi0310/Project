@@ -1,203 +1,251 @@
-// Navbar Functionality
-const mobileMenuButton = document.getElementById('mobileMenuButton');
-const navLinks = document.getElementById('navLinks');
-
-mobileMenuButton.addEventListener('click', (event) => {
-    event.stopPropagation();
-    navLinks.classList.toggle('show');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded');
+    setupMobileMenu();
+    loadSelectedPlan();
+    setupPaymentOptions();
 });
 
-window.addEventListener('click', (event) => {
-    if (!mobileMenuButton.contains(event.target) && !navLinks.contains(event.target)) {
-        navLinks.classList.remove('show');
+function setupMobileMenu() {
+    const mobileMenuButton = document.getElementById('mobileMenuButton');
+    const navLinks = document.getElementById('navLinks');
+
+    if (!mobileMenuButton) {
+        console.error('Mobile menu button not found');
+        return;
     }
-});
-
-// Utility Functions
-function showError(input, message) {
-    let errorDiv = input.parentElement.querySelector('.error-message');
-    if (!errorDiv) {
-        errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message text-red-500 text-sm mt-1';
-        input.parentElement.appendChild(errorDiv);
-    }
-    errorDiv.textContent = message;
-    input.classList.add('border-red-500');
-}
-
-function removeError(input) {
-    const errorDiv = input.parentElement.querySelector('.error-message');
-    if (errorDiv) errorDiv.remove();
-    input.classList.remove('border-red-500');
-}
-
-function isEmpty(value) {
-    return value.trim() === '';
-}
-
-// Validation Functions
-function validateUPI(upiId) {
-    return /^[a-zA-Z0-9._-]+@[a-zA-Z]{3,}$/.test(upiId);
-}
-
-function validateCard(cardNumber) {
-    cardNumber = cardNumber.replace(/\s/g, '');
-    return /^\d{16}$/.test(cardNumber);
-}
-
-function validateExpiry(expiry) {
-    if (!/^\d{2}\/\d{2}$/.test(expiry)) return false;
-    const [month, year] = expiry.split('/');
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear() % 100;
-    const currentMonth = currentDate.getMonth() + 1;
-    const numMonth = parseInt(month);
-    const numYear = parseInt(year);
-    if (numMonth < 1 || numMonth > 12) return false;
-    if (numYear < currentYear || (numYear === currentYear && numMonth < currentMonth)) return false;
-    return true;
-}
-
-// Formatting Functions
-function formatCard(value) {
-    value = value.replace(/\D/g, '');
-    value = value.replace(/(\d{4})/g, '$1 ');
-    return value.trim();
-}
-
-function formatExpiry(value) {
-    value = value.replace(/\D/g, '');
-    if (value.length >= 2) {
-        return value.substring(0, 2) + '/' + value.substring(2, 4);
-    }
-    return value;
-}
-
-// Form Validation Setup
-function setupValidation() {
-    const upiForm = document.getElementById('upiPaymentForm');
-    if (upiForm) {
-        const upiInput = document.getElementById('upiId');
-        upiInput.onblur = () => {
-            if (isEmpty(upiInput.value)) showError(upiInput, 'UPI ID is required');
-            else if (!validateUPI(upiInput.value)) showError(upiInput, 'Enter valid UPI ID (example@upi)');
-        };
-        upiInput.oninput = () => removeError(upiInput);
-        upiForm.onsubmit = (e) => {
-            e.preventDefault();
-            if (isEmpty(upiInput.value)) showError(upiInput, 'UPI ID is required');
-            else if (validateUPI(upiInput.value)) processPayment('UPI');
-        };
+    if (!navLinks) {
+        console.error('Nav links not found');
+        return;
     }
 
-    const cardForm = document.getElementById('cardPaymentForm');
-    if (cardForm) {
-        const cardNumber = document.getElementById('cardNumber');
-        const cardName = document.getElementById('cardName');
-        const expiry = document.getElementById('expiryDate');
-        const cvv = document.getElementById('cvv');
+    console.log('Mobile menu setup initialized');
+    mobileMenuButton.addEventListener('click', () => {
+        console.log('Mobile menu button clicked');
+        navLinks.classList.toggle('show');
+        console.log('Nav links classList:', navLinks.classList);
+    });
 
-        cardNumber.oninput = () => { cardNumber.value = formatCard(cardNumber.value); removeError(cardNumber); };
-        expiry.oninput = () => { expiry.value = formatExpiry(expiry.value); removeError(expiry); };
-        cardName.oninput = () => removeError(cardName);
-        cvv.oninput = () => removeError(cvv);
-
-        cardNumber.onblur = () => {
-            if (isEmpty(cardNumber.value)) showError(cardNumber, 'Card number is required');
-            else if (!validateCard(cardNumber.value)) showError(cardNumber, 'Enter valid 16-digit card number');
-        };
-        cardName.onblur = () => {
-            if (isEmpty(cardName.value)) showError(cardName, 'Name on card is required');
-            else if (!/^[a-zA-Z\s]{3,}$/.test(cardName.value)) showError(cardName, 'Enter valid name (min 3 chars)');
-        };
-        expiry.onblur = () => {
-            if (isEmpty(expiry.value)) showError(expiry, 'Expiry date is required');
-            else if (!validateExpiry(expiry.value)) showError(expiry, 'Enter valid expiry date (MM/YY)');
-        };
-        cvv.onblur = () => {
-            if (isEmpty(cvv.value)) showError(cvv, 'CVV is required');
-            else if (!/^\d{3,4}$/.test(cvv.value)) showError(cvv, 'Enter valid CVV');
-        };
-
-        cardForm.onsubmit = (e) => {
-            e.preventDefault();
-            let isValid = true;
-            if (isEmpty(cardNumber.value)) { showError(cardNumber, 'Card number is required'); isValid = false; }
-            else if (!validateCard(cardNumber.value)) { showError(cardNumber, 'Enter valid 16-digit card number'); isValid = false; }
-            if (isEmpty(cardName.value)) { showError(cardName, 'Name on card is required'); isValid = false; }
-            else if (!/^[a-zA-Z\s]{3,}$/.test(cardName.value)) { showError(cardName, 'Enter valid name (min 3 chars)'); isValid = false; }
-            if (isEmpty(expiry.value)) { showError(expiry, 'Expiry date is required'); isValid = false; }
-            else if (!validateExpiry(expiry.value)) { showError(expiry, 'Enter valid expiry date (MM/YY)'); isValid = false; }
-            if (isEmpty(cvv.value)) { showError(cvv, 'CVV is required'); isValid = false; }
-            else if (!/^\d{3,4}$/.test(cvv.value)) { showError(cvv, 'Enter valid CVV'); isValid = false; }
-            if (isValid) processPayment('Card');
-        };
-    }
-
-    const netBankingForm = document.getElementById('netBankingPaymentForm');
-    if (netBankingForm) {
-        const bankSelect = document.getElementById('bankName');
-        bankSelect.onblur = () => { if (isEmpty(bankSelect.value)) showError(bankSelect, 'Please select a bank'); };
-        bankSelect.onchange = () => removeError(bankSelect);
-        netBankingForm.onsubmit = (e) => {
-            e.preventDefault();
-            if (isEmpty(bankSelect.value)) showError(bankSelect, 'Please select a bank');
-            else processPayment('NetBanking');
-        };
-    }
+    document.addEventListener('click', (event) => {
+        if (!mobileMenuButton.contains(event.target) && !navLinks.contains(event.target)) {
+            navLinks.classList.remove('show');
+            console.log('Mobile menu closed due to outside click');
+        }
+    });
 }
 
-// Payment Method Selection
-document.querySelectorAll('.payment-option').forEach(option => {
-    option.onclick = () => {
-        document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-        document.querySelectorAll('.payment-form').forEach(form => form.classList.remove('active'));
-        const paymentType = option.getAttribute('data-payment');
-        document.getElementById(paymentType + 'Form').classList.add('active');
-    };
-});
-
-// Process Payment
-function processPayment(method) {
-    const plan = JSON.parse(sessionStorage.getItem('selectedPlan'));
-    const payment = {
-        planName: plan.name,
-        amount: plan.price,
-        method: method,
-        transactionId: 'TX' + Date.now(),
-        date: new Date().toLocaleString()
-    };
-    sessionStorage.setItem('paymentInfo', JSON.stringify(payment));
-    window.location.href = 'payment conformation.html'; // Corrected typo in filename
-}
-
-// Load Selected Plan
-window.onload = () => {
+function loadSelectedPlan() {
     const urlParams = new URLSearchParams(window.location.search);
-    const plan = {
-        name: urlParams.get('planName'),
-        price: urlParams.get('price'),
-        data: urlParams.get('data'),
-        validity: urlParams.get('validity')
-    };
+    const planName = urlParams.get('planName') || 'Unknown Plan';
+    const price = urlParams.get('price') || '0';
+    const data = urlParams.get('data') || 'N/A';
+    const validity = urlParams.get('validity') || 'N/A';
 
-    if (plan.name) {
-        plan.id = 'PLAN_' + Math.random().toString(36).substr(2, 9);
-        sessionStorage.setItem('selectedPlan', JSON.stringify(plan));
+    const planData = { name: planName, price: price, data: data, validity: validity };
+    sessionStorage.setItem('selectedPlan', JSON.stringify(planData));
+    console.log('Selected Plan Stored:', planData);
+
+    document.getElementById('selected-plan-name').textContent = planName;
+    document.getElementById('selected-plan-price').textContent = `₹${price}`;
+    document.getElementById('selected-plan-data').textContent = data;
+    document.getElementById('selected-plan-validity').textContent = validity;
+}
+
+function setupPaymentOptions() {
+    const paymentOptions = document.querySelectorAll('.payment-option');
+    const paymentForms = document.querySelectorAll('.payment-form');
+
+    if (!paymentOptions.length) {
+        console.error('No payment options found');
+        return;
+    }
+    if (!paymentForms.length) {
+        console.error('No payment forms found');
+        return;
     }
 
-    const storedPlan = JSON.parse(sessionStorage.getItem('selectedPlan'));
-    if (storedPlan) {
-        document.getElementById('selected-plan-name').textContent = storedPlan.name;
-        document.getElementById('selected-plan-price').textContent = storedPlan.price;
-        document.getElementById('selected-plan-data').textContent = storedPlan.data;
-        document.getElementById('selected-plan-validity').textContent = storedPlan.validity;
-    } else {
-        document.getElementById('selected-plan-container').innerHTML =
-            '<div class="p-4 bg-red-50 text-red-700">Please select a plan first</div>';
-    }
+    console.log('Payment options setup initialized');
 
-    setupValidation();
-    document.querySelector('.payment-option[data-payment="upi"]').click();
-};
+    paymentOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            console.log('Payment option clicked:', option.getAttribute('data-payment'));
+            paymentOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+
+            const paymentMethod = option.getAttribute('data-payment');
+            paymentForms.forEach(form => form.classList.remove('active'));
+            const activeForm = document.getElementById(`${paymentMethod}Form`);
+            if (activeForm) {
+                activeForm.classList.add('active');
+                console.log('Activated form:', paymentMethod);
+            } else {
+                console.error('Form not found for payment method:', paymentMethod);
+            }
+        });
+    });
+
+    document.getElementById('upiPaymentForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const upiId = document.getElementById('upiId').value.trim();
+        const upiIdError = document.getElementById('upiIdError');
+        console.log('UPI form submitted, UPI ID:', upiId);
+
+        upiIdError.classList.add('hidden');
+        if (!upiId) {
+            upiIdError.textContent = 'UPI ID cannot be empty';
+            upiIdError.classList.remove('hidden');
+            return;
+        }
+        if (!upiId.includes('@')) {
+            upiIdError.textContent = 'Please enter a valid UPI ID (e.g., username@upi)';
+            upiIdError.classList.remove('hidden');
+            return;
+        }
+        processPayment('UPI', { upiId });
+    });
+
+    document.getElementById('cardPaymentForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '').trim();
+        const cardName = document.getElementById('cardName').value.trim();
+        const expiryDate = document.getElementById('expiryDate').value.trim();
+        const cvv = document.getElementById('cvv').value.trim();
+        const cardNumberError = document.getElementById('cardNumberError');
+        const cardNameError = document.getElementById('cardNameError');
+        const expiryDateError = document.getElementById('expiryDateError');
+        const cvvError = document.getElementById('cvvError');
+
+        console.log('Card form submitted:', { cardNumber, cardName, expiryDate, cvv });
+
+        cardNumberError.classList.add('hidden');
+        cardNameError.classList.add('hidden');
+        expiryDateError.classList.add('hidden');
+        cvvError.classList.add('hidden');
+
+        let hasError = false;
+        if (!cardNumber) {
+            cardNumberError.textContent = 'Card number cannot be empty';
+            cardNumberError.classList.remove('hidden');
+            hasError = true;
+        } else if (!/^\d{16}$/.test(cardNumber)) {
+            cardNumberError.textContent = 'Please enter a valid 16-digit card number';
+            cardNumberError.classList.remove('hidden');
+            hasError = true;
+        }
+        if (!cardName) {
+            cardNameError.textContent = 'Name on card cannot be empty';
+            cardNameError.classList.remove('hidden');
+            hasError = true;
+        }
+        if (!expiryDate) {
+            expiryDateError.textContent = 'Expiry date cannot be empty';
+            expiryDateError.classList.remove('hidden');
+            hasError = true;
+        } else if (!/^\d{2}\/\d{2}$/.test(expiryDate)) {
+            expiryDateError.textContent = 'Please enter a valid expiry date (MM/YY)';
+            expiryDateError.classList.remove('hidden');
+            hasError = true;
+        }
+        if (!cvv) {
+            cvvError.textContent = 'CVV cannot be empty';
+            cvvError.classList.remove('hidden');
+            hasError = true;
+        } else if (!/^\d{3}$/.test(cvv)) {
+            cvvError.textContent = 'Please enter a valid 3-digit CVV';
+            cvvError.classList.remove('hidden');
+            hasError = true;
+        }
+
+        if (hasError) return;
+        processPayment('Card', { cardNumber, cardName, expiryDate, cvv });
+    });
+
+    document.getElementById('netBankingPaymentForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const bankName = document.getElementById('bankName').value;
+        const bankNameError = document.getElementById('bankNameError');
+        console.log('Net Banking form submitted, Bank:', bankName);
+
+        bankNameError.classList.add('hidden');
+        if (!bankName) {
+            bankNameError.textContent = 'Please select a bank';
+            bankNameError.classList.remove('hidden');
+            return;
+        }
+        processPayment('Net Banking', { bankName });
+    });
+
+    function processPayment(method, paymentDetails) {
+        // Get phone number from URL params or localStorage
+        const urlParams = new URLSearchParams(window.location.search);
+        const phoneNumber = urlParams.get('phoneNumber') || localStorage.getItem('userPhone');
+        const email = null; // Optional field, add input if needed
+
+        if (!phoneNumber) {
+            console.error('No phone number found in URL or localStorage');
+            document.querySelector('.payment-form.active')?.insertAdjacentHTML(
+                'beforeend',
+                `<p class="text-red-500 text-sm mt-2">Please enter your phone number on the home page first.</p>`
+            );
+            return;
+        }
+
+        console.log('Processing payment with method:', method, 'Phone:', phoneNumber);
+
+        const plan = JSON.parse(sessionStorage.getItem('selectedPlan'));
+        if (!plan) {
+            console.error('No plan selected');
+            window.location.href = '/customer/plans.html';
+            return;
+        }
+
+        const paymentRequest = {
+            phoneNumber: phoneNumber,
+            planName: plan.name,
+            amount: parseFloat(plan.price),
+            paymentMethod: method,
+            transactionId: 'TX' + Date.now(),
+            validity: plan.validity,
+            email: email,
+            paymentDetails: paymentDetails
+        };
+
+        console.log('Payment request:', paymentRequest);
+
+        fetch('http://localhost:8081/api/payment/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(paymentRequest)
+        })
+        .then(response => {
+            console.log('Fetch response status:', response.status);
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error || 'Payment failed'); });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Payment response:', data);
+            const paymentInfo = {
+                planName: paymentRequest.planName,
+                amount: paymentRequest.amount,
+                method: paymentRequest.paymentMethod,
+                transactionId: paymentRequest.transactionId,
+                date: new Date().toLocaleString(),
+                validity: paymentRequest.validity,
+                phoneNumber: paymentRequest.phoneNumber
+            };
+            sessionStorage.setItem('paymentInfo', JSON.stringify(paymentInfo));
+            console.log('Payment Info Stored:', paymentInfo);
+
+            const urlParams = new URLSearchParams(paymentInfo).toString();
+            window.location.href = `/customer/paymentconformation.html?${urlParams}`;
+        })
+        .catch(error => {
+            console.error('Payment error:', error.message);
+            document.querySelector('.payment-form.active')?.insertAdjacentHTML(
+                'beforeend',
+                `<p class="text-red-500 text-sm mt-2">${error.message}</p>`
+            );
+        });
+    }
+}

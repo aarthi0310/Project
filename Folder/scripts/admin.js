@@ -22,15 +22,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ adminName: adminID, password: password })
             });
 
+            const responseText = await response.text();
             if (!response.ok) {
-                throw new Error(await response.text());
+                throw new Error(responseText || 'Login failed');
             }
 
-            loginSuccess.textContent = 'Login successful! Redirecting...';
+            loginSuccess.textContent = 'Login successful! Redirecting to Plans Management...';
             loginSuccess.style.display = 'block';
-            setTimeout(() => window.location.href = 'plansmanagement.html', 1500);
+            setTimeout(() => window.location.href = '/admin/plansmanagement.html', 1500);
         } catch (error) {
-            passwordError.textContent = error.message;
+            passwordError.textContent = error.message === 'Invalid credentials' ? 'Invalid username or password' : 'Failed to login: ' + error.message;
             passwordError.style.display = 'block';
         }
     });

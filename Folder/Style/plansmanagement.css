@@ -232,4 +232,9 @@ input:checked + .switch-slider:before {
     .space-x-2 {
         flex-direction: row;
     }
+    /* Inside plansmanagement.css */
+#customCategory:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+}
 }

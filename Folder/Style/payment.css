@@ -1,159 +1,268 @@
-.hero-gradient {
-    background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+/* Sidebar Navigation */
+.sidebar-nav:hover { 
+    background-color:rgb(66, 66, 150); 
+    border-radius: 0.5rem; 
 }
-.dropdown-menu {
-    display: none;
+
+/* Notification Badge Animation */
+.notification-badge { 
+    animation: pulse 2s infinite; 
+}
+
+@keyframes pulse { 
+    0%, 100% { transform: scale(1); } 
+    50% { transform: scale(1.1); } 
+}
+
+/* Modal Styling */
+.modal { 
+    display: none; 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; height: 100%; 
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 100; 
+    overflow-y: auto; 
+}
+
+.modal-content { 
+    background-color: white; 
+    margin: 5% auto; 
+    padding: 20px; 
+    border-radius: 8px; 
+    width: 80%; 
+    max-width: 500px; 
+}
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+
+.switch input { 
+    opacity: 0; 
+    width: 0; 
+    height: 0; 
+}
+
+.switch-slider {
     position: absolute;
-    right: 0;
-    top: 100%;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 20px;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px; width: 16px;
+    left: 2px; bottom: 2px;
     background-color: white;
-    min-width: 160px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    border-radius: 0.5rem;
-    margin-top: 0.5rem;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .switch-slider {
+    background-color: #10b981;
+}
+
+input:checked + .switch-slider:before {
+    transform: translateX(16px);
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.edit-btn { color: #3b82f6; }
+.edit-btn:hover { background-color: rgba(59, 130, 246, 0.1); }
+.delete-btn { color: #ef4444; }
+.delete-btn:hover { background-color: rgba(239, 68, 68, 0.1); }
+
+/* Fixed Sidebar */
+.fixed-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 16rem;
+    height: 100vh;
+    background-color:rgb(66, 66, 150);
+    padding: 1rem;
     z-index: 50;
 }
-.dropdown-menu.show {
-    display: block;
+
+/* Main Content */
+.main-content {
+    margin-left: 16rem;
+    padding: 2rem;
 }
-.plan-highlight {
-    background-color: #f0f9ff;
-    border-left: 4px solid #2563eb;
+
+/* Analytics Bar */
+.analytics-bar {
+    background-color: #3b82f6;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-.payment-option:hover {
-    background-color: #f0f7ff;
-    border-color: #2563eb;
+
+.bulk-action-btn {
+    background-color: #6b7280;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
 }
-.payment-option.selected {
-    background-color: #f0f7ff;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+
+.bulk-action-btn:hover {
+    background-color: #4b5563;
 }
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
 }
-.animate-fadeIn {
-    animation: fadeIn 0.5s ease-in-out;
-}
-.payment-form {
+
+.status-active { background-color: #10b981; }
+.status-inactive { background-color: #ef4444; }
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
     display: none;
-}
-.payment-form.active {
-    display: block;
-    animation: fadeIn 0.5s ease-in-out;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 60;
+    background: #1e3a8a;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
 }
 
 /* Responsive Adjustments */
-@media (max-width: 640px) { /* Mobile */
-    .nav-links {
-        display: none;
+/* Mobile (max-width: 640px) */
+@media (max-width: 640px) {
+    .fixed-sidebar {
+        transform: translateX(-100%);
+        width: 75%;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .fixed-sidebar.show {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0;
+        padding: 3rem 1rem 1rem 1rem; /* Increased top padding to avoid toggle overlap */
+    }
+    .main-content h1 {
+        margin-left: 2.5rem; /* Shift header text to avoid toggle */
+    }
+    .mobile-menu-toggle {
+        display: block;
+    }
+    .flex-wrap.justify-between {
         flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .space-x-2 {
+        flex-direction: column;
+        gap: 0.5rem;
         width: 100%;
-        position: absolute;
-        top: 4rem;
-        left: 0;
-        background-color: white;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        padding: 0.5rem 0;
-        z-index: 40;
     }
-    .nav-links.show {
-        display: flex;
-    }
-    .nav-links a, .nav-links .relative {
-        padding: 0.75rem 1rem;
+    .space-x-2 > * {
         width: 100%;
-        text-align: left;
+        margin-left: 0 !important;
     }
-    .dropdown-menu {
-        position: static;
-        width: 100%;
-        box-shadow: none;
-        border-radius: 0;
+    .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
     }
-    .hero-gradient {
-        padding-top: 6rem;
-        padding-bottom: 2rem;
+    thead tr th:nth-child(3), tbody tr td:nth-child(3), /* Data */
+    thead tr th:nth-child(5), tbody tr td:nth-child(5) /* Category */ {
+        display: none;
     }
-    .hero-gradient h1 {
-        font-size: 1.5rem;
-    }
-    .hero-gradient p {
-        font-size: 0.875rem;
-    }
-    #selected-plan-container, .p-6 {
+    .modal-content {
+        width: 90%;
+        max-width: 100%;
         padding: 1rem;
     }
-    #selected-plan-container h2 {
-        font-size: 1.25rem;
-    }
-    .plan-highlight {
-        padding: 1rem;
-    }
-    .payment-option {
-        padding: 1rem;
-    }
-    .payment-option h3 {
-        font-size: 1rem;
-    }
-    .payment-option p {
-        font-size: 0.875rem;
-    }
-    .payment-form {
-        padding: 1rem;
-    }
-    .payment-form h3 {
-        font-size: 1rem;
-    }
-    .payment-form input, .payment-form select {
-        font-size: 0.875rem;
-    }
-    .payment-form button {
-        width: 100%;
-        padding: 0.75rem;
+    .modal-footer {
+        flex-direction: column;
+        gap: 0.5rem;
     }
 }
 
-@media (min-width: 641px) and (max-width: 1023px) { /* Tablet */
-    .nav-links {
-        display: flex;
+/* Desktop (min-width: 1024px) */
+@media (min-width: 1024px) {
+    .fixed-sidebar {
+        width: 16rem;
     }
-    .mobile-menu-button {
+    .main-content {
+        margin-left: 16rem;
+        padding: 2rem;
+    }
+    .mobile-menu-toggle {
         display: none;
     }
-    .hero-gradient {
-        padding-top: 7rem;
-        padding-bottom: 2.5rem;
+    .flex-wrap.justify-between {
+        flex-direction: row;
     }
-    .hero-gradient h1 {
-        font-size: 2rem;
+    .space-x-2 {
+        flex-direction: row;
     }
-    .hero-gradient p {
-        font-size: 1rem;
-    }
-    #selected-plan-container, .p-6 {
-        padding: 1.5rem;
-    }
-    #selected-plan-container h2 {
-        font-size: 1.5rem;
-    }
-    .payment-option {
-        padding: 1.5rem;
-    }
-    .payment-form {
-        padding: 1.5rem;
-    }
-    .payment-form h3 {
-        font-size: 1.125rem;
-    }
+    /* Inside plansmanagement.css */
+#customCategory:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+}
+body {
+    background-color: #dbeafe; /* Light blue background */
 }
 
-@media (min-width: 1024px) { /* Desktop */
-    .mobile-menu-button {
-        display: none;
-    }
-    .nav-links {
-        display: flex;
-    }
+.hero-gradient {
+    background: linear-gradient(135deg, #3b82f6, #1e3a8a); /* Blue gradient for hero */
+}
+
+/* Payment form visibility */
+.payment-form {
+    display: none;
+}
+
+.payment-form.active {
+    display: block;
+}
+
+/* Dropdown styling */
+#paymentMethod {
+    background-color: white;
+    color: #1e3a8a; /* Dark blue text */
+    font-weight: 500;
+}
+
+#paymentMethod:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
 }
