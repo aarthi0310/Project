@@ -18,7 +18,7 @@ async function fetchWithAuth(url, options = {}) {
     return fetch(url, options);
 }
 
-// Load tickets from backend
+
 async function loadTickets() {
     try {
         const response = await fetchWithAuth('http://localhost:8081/api/support/tickets');
