@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Form submission
+   
     rechargeForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const phoneNumber = phoneInput.value.trim();
