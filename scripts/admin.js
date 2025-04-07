@@ -53,13 +53,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log("Received JWT Token: ", result.token);
                 localStorage.setItem('jwtToken', result.token);
 
-                // Display success message and redirect
-                loginSuccess.textContent = 'Login successful! Redirecting to Plans Management...';
+                // Display success message and redirect to admindashboard.html
+                loginSuccess.textContent = 'Login successful! Redirecting to Admin Dashboard...';
                 loginSuccess.style.display = 'block';
                 adminIDInput.disabled = true;
                 passwordInput.disabled = true;
                 setTimeout(() => {
-                    window.location.href = result.redirectUrl || '/admin/plansmanagement.html';
+                    window.location.href = '/admin/admindashboard.html'; // Fixed redirect URL
                 }, 1500);
             } else {
                 // Display error message
@@ -70,15 +70,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error logging in:', error);
-            passwordError.textContent = 'Server error. Please try again.';
+            passwordError.textContent = 'Server error or network issue. Please try again.';
             passwordError.style.display = 'block';
             adminIDInput.style.borderColor = '#dc2626';
             passwordInput.style.borderColor = '#dc2626';
         }
     });
 
-    // Function to add JWT token to future requests (for consistency with other scripts)
-    function fetchWithAuth(url, options = {}) {
+    // Function to add JWT token to future requests
+    window.fetchWithAuth = function(url, options = {}) {
         const token = localStorage.getItem('jwtToken');
         if (token) {
             options.headers = {
@@ -87,5 +87,5 @@ document.addEventListener('DOMContentLoaded', function() {
             };
         }
         return fetch(url, options);
-    }
+    };
 });
