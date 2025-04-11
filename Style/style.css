@@ -1,52 +1,100 @@
+/* Base Styles */
 .hero-gradient {
     background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
 }
 
-.feature-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+body {
+    font-family: 'Poppins', sans-serif;
 }
 
-.feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+/* Animation Effects */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.slide-in {
-    animation: slideIn 0.5s ease-out;
-}
-
-@keyframes slideIn {
+@keyframes slideInRight {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateX(30px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
 }
 
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background-color: white;
-    min-width: 200px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 50;
-    border-radius: 0.5rem;
-    margin-top: 0.5rem;
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
-.dropdown-active .dropdown-menu {
-    display: block !important;
+@keyframes floatHorizontal {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+    100% { transform: translateX(0); }
 }
 
-.text-left {
-    text-align: left;
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
+/* Animated Elements */
+.slide-in {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.feature-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn 1s ease-out;
+}
+
+.feature-card:hover {
+    transform: translateX(8px);
+    box-shadow: 8px 5px 15px rgba(37, 99, 235, 0.1);
+}
+
+.feature-icon {
+    animation: pulse 3s infinite ease-in-out;
+}
+
+img {
+    border-radius: 0; /* Remove image decoration */
+    box-shadow: none; /* Remove shadow decoration */
+    border: none; /* Remove border decoration */
+    transition: transform 0.5s ease;
+}
+
+/* Hero section image animation */
+.hero-gradient img {
+    animation: floatHorizontal 6s infinite ease-in-out;
+    transition: transform 0.5s ease;
+    box-shadow: none !important;
+}
+
+.hero-gradient img:hover {
+    transform: scale(1.03);
+}
+
+/* Left side content animation */
+.hero-gradient .slide-in:first-child {
+    animation: slideInLeft 0.8s ease-out;
+}
+
+/* Right side image animation */
+.hero-gradient .slide-in:last-child {
+    animation: slideInRight 0.8s ease-out;
+}
+
+/* Button Animations */
 .button {
     display: inline-block;
     padding: 10px 20px;
@@ -59,11 +107,69 @@
     text-decoration: none;
     margin: 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .button:hover {
     background-color: #0056b3;
+    transform: translateX(2px);
+    box-shadow: 3px 3px 10px rgba(0, 123, 255, 0.4);
+}
+
+.button:active {
+    transform: translateX(0);
+    box-shadow: 1px 1px 5px rgba(0, 123, 255, 0.4);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.15);
+    z-index: 50;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.dropdown-active .dropdown-menu {
+    display: block !important;
+}
+
+/* Nav Links Animation */
+nav a {
+    position: relative;
+}
+
+nav a:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #2563eb;
+    bottom: -3px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+nav a:hover:after {
+    width: 100%;
+}
+
+/* Text Alignment */
+.text-left {
+    text-align: left;
+}
+
+/* Support Section */
+.bg-gray-50 .button {
+    animation: fadeIn 1s ease-out;
 }
 
 /* Responsive adjustments */
@@ -72,15 +178,19 @@
         padding-top: 10rem;
         padding-bottom: 3rem;
     }
-
+    
     .button {
         display: block;
         width: 100%;
         margin: 10px 0;
     }
-
+    
     .nav-links {
         padding-bottom: 1rem;
+    }
+    
+    .hero-gradient img {
+        animation: fadeIn 1.5s ease-out;
     }
 }
 
@@ -97,11 +207,54 @@
     }
 }
 
+/* Feature Cards Animation */
+.feature-card:nth-child(1) {
+    animation: slideInLeft 0.8s ease-out;
+    animation-delay: 0.2s;
+}
+
+.feature-card:nth-child(2) {
+    animation: slideInLeft 0.8s ease-out;
+    animation-delay: 0.4s;
+}
+
+.feature-card:nth-child(3) {
+    animation: slideInLeft 0.8s ease-out;
+    animation-delay: 0.6s;
+}
+
+/* Font Face */
 @font-face {
     font-family: 'Poppins';
     src: url('/assets/fonts/poppins-regular.ttf') format('truetype');
 }
 
-body {
-    font-family: 'Poppins', sans-serif;
+/* Footer link hover effect */
+footer a {
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+footer a:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    background: white;
+    bottom: -2px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+footer a:hover:after {
+    width: 100%;
+}
+
+/* Social icons animation */
+footer svg {
+    transition: transform 0.3s ease;
+}
+
+footer svg:hover {
+    transform: translateX(3px);
 }

@@ -57,15 +57,19 @@
 
     <div class="hero-gradient pt-24 pb-12 md:pt-32 md:pb-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col items-center justify-center text-center">
-                <div class="max-w-xl text-white mb-8 w-full px-4 sm:px-0">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="max-w-xl text-white mb-8 md:mb-0 w-full px-4 sm:px-0">
                     <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 slide-in">Experience Next-Gen Connectivity</h1>
                     <p class="text-lg sm:text-xl mb-8 opacity-90 slide-in">High-speed data, instant recharge, and transparent pricing.</p>
-                    <div class="relative slide-in w-full max-w-md mx-auto">
+                    <div class="relative slide-in w-full max-w-md">
                         <input type="text" id="mobileNumber" placeholder="Enter Mobile Number" class="w-full px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400" maxlength="10">
                         <p id="formatErrorMessage" class="text-red-200 text-sm mt-1 hidden text-left">Please enter a valid 10-digit number</p>
                         <p id="mobiCommErrorMessage" class="text-red-200 text-sm mt-1 hidden text-left">Please enter a valid Mobi-Comm number</p>
                     </div>
+                    
+                </div>
+                <div class="w-full md:w-1/2 flex justify-center slide-in">
+                    <img src="./assets/download1.png" alt="5G Network Illustration" class="rounded-lg shadow-2xl">
                 </div>
             </div>
         </div>

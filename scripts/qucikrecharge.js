@@ -16,12 +16,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedPlanData = document.getElementById('selectedPlanData');
     const selectedPlanValidity = document.getElementById('selectedPlanValidity');
 
-    // Display selected plan
-    selectedPlanContainer.classList.remove('hidden');
-    selectedPlanName.textContent = planName;
-    selectedPlanPrice.textContent = `₹${price}`;
-    selectedPlanData.textContent = data;
-    selectedPlanValidity.textContent = validity;
+    // Verify DOM elements and display selected plan
+    if (selectedPlanContainer && selectedPlanName && selectedPlanPrice && selectedPlanData && selectedPlanValidity) {
+        selectedPlanContainer.classList.remove('hidden');
+        selectedPlanName.textContent = planName;
+        selectedPlanPrice.textContent = `₹${price}`;
+        selectedPlanData.textContent = data;
+        selectedPlanValidity.textContent = validity;
+
+        // Log to console for debugging
+        console.log('Selected Plan Data:', { planName, price, data, validity });
+    } else {
+        console.error('One or more selected plan elements not found in DOM');
+    }
 
     // Store plan in sessionStorage for later use
     const planData = { name: planName, price, data, validity };
@@ -62,22 +69,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         try {
-            const response = await fetch('http://localhost:8081/api/validate-phone', {
+            const response = await fetch('http://localhost:8081/api/users/validate-phone', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phoneNumber })
             });
-            
-            const data = await response.json();
-            if (response.ok) {
-                phoneError.classList.remove('show');
-                localStorage.setItem('userPhone', phoneNumber);
-                const redirectUrl = `/customer/payment.html?planName=${encodeURIComponent(planName)}&price=${encodeURIComponent(price)}&data=${encodeURIComponent(data)}&validity=${encodeURIComponent(validity)}&phoneNumber=${encodeURIComponent(phoneNumber)}`;
-                window.location.href = redirectUrl;
-            } else {
-                phoneError.textContent = data.error || 'Validation failed';
-                phoneError.classList.add('show');
+
+            if (!response.ok) {
+                const text = await response.text();
+                try {
+                    const data = text ? JSON.parse(text) : { error: 'Unknown error' };
+                    phoneError.textContent = data.error || 'Validation failed';
+                    phoneError.classList.add('show');
+                } catch (e) {
+                    phoneError.textContent = 'Server error: Invalid response';
+                    phoneError.classList.add('show');
+                }
+                return;
             }
+
+            const responseData = await response.json(); // Rename to avoid confusion with urlParams.data
+            phoneError.classList.remove('show');
+            localStorage.setItem('userPhone', phoneNumber);
+            const redirectUrl = `/customer/payment.html?planName=${encodeURIComponent(planName)}&price=${encodeURIComponent(price)}&data=${encodeURIComponent(data)}&validity=${encodeURIComponent(validity)}&phoneNumber=${encodeURIComponent(phoneNumber)}`;
+            window.location.href = redirectUrl;
         } catch (error) {
             console.error('Fetch error:', error);
             phoneError.textContent = 'An error occurred. Please try again.';
