@@ -121,8 +121,9 @@
     .mobile-menu-toggle {
         display: block;
     }
+    /*responsiveness*/
     .grid-cols-3 {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /*1 fraction unit*/
     }
     .md\:flex-row {
         flex-direction: column;

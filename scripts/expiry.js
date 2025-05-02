@@ -1,3 +1,7 @@
+// Global variables to store expiring plans and notified count
+let expiringCustomers = [];
+let notifiedCount = 0;
+
 // Function to calculate days left
 function getDaysLeft(expiryDate) {
     const today = new Date();
@@ -146,11 +150,8 @@ function renderExpiringPlansTable(customers) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                    <button class="notify-btn bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded transition ${customer.notified ? 'opacity-50 cursor-not-allowed' : ''}" data-name="${customer.name}" ${customer.notified ? 'disabled' : ''}>
+                    <button class="notify-btn bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded transition ${customer.notified || daysLeft > 3 ? 'opacity-50 cursor-not-allowed' : ''}" data-id="${customer.id}" data-name="${customer.name}" ${customer.notified || daysLeft > 3 ? 'disabled' : ''}>
                         <i class="fas fa-envelope mr-1"></i> Notify
-                    </button>
-                    <button class="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded transition">
-                        <i class="fas fa-redo mr-1"></i> Renew
                     </button>
                 </div>
             </td>
@@ -162,9 +163,37 @@ function renderExpiringPlansTable(customers) {
     document.getElementById('plans-count').textContent = customers.length;
 
     document.querySelectorAll('.notify-btn:not(:disabled)').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', async function() {
             const customerName = this.getAttribute('data-name');
-            showNotification(`Successfully notified ${customerName}`);
+            const rechargeId = this.getAttribute('data-id');
+            try {
+                const response = await fetchWithAuth(`http://localhost:8081/api/test/notify-expiring`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`Failed to notify user: ${response.status}`);
+                }
+                const data = await response.json();
+                const newNotifiedCount = data.notifiedCount || 0;
+
+                // Update local data
+                const customer = expiringCustomers.find(c => c.id === parseInt(rechargeId));
+                if (customer) {
+                    customer.notified = true;
+                    notifiedCount = newNotifiedCount;
+                    updateTable();
+                    showNotification(`Successfully notified ${customerName}`);
+                } else {
+                    console.error('Customer not found for ID:', rechargeId);
+                    showNotification('Failed to update notification status', true);
+                }
+            } catch (error) {
+                console.error('Error notifying user:', error);
+                showNotification('Failed to notify user', true);
+            }
         });
     });
 }
@@ -179,15 +208,15 @@ function updateDashboardCards(customers, notifiedCount) {
     const threeDaysElement = document.getElementById('expiring-3days');
     const notifiedElement = document.getElementById('notified-count');
 
-    if (!notifiedElement) {
-        console.error('Notified count element not found in DOM');
+    if (!todayElement || !threeDaysElement || !notifiedElement) {
+        console.error('Dashboard elements not found in DOM');
         return;
     }
 
     todayElement.textContent = todayCount;
     threeDaysElement.textContent = threeDaysCount;
     notifiedElement.textContent = notifiedCount;
-    console.log('Dashboard updated - Notified count in DOM:', notifiedElement.textContent);
+    console.log('Dashboard updated - Today:', todayElement.textContent, '3 Days:', threeDaysElement.textContent, 'Notified:', notifiedElement.textContent);
 }
 
 // Fetch with authentication
@@ -233,6 +262,19 @@ async function fetchExpiringPlans() {
     }
 }
 
+// Function to update table and dashboard
+function updateTable() {
+    const filterSelect = document.getElementById('filterDays');
+    const sortSelect = document.getElementById('sortBy');
+    const filteredAndSortedCustomers = filterAndSortCustomers(
+        expiringCustomers,
+        filterSelect.value,
+        sortSelect.value
+    );
+    renderExpiringPlansTable(filteredAndSortedCustomers);
+    updateDashboardCards(filteredAndSortedCustomers, notifiedCount);
+}
+
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", async function() {
     // Check if the user is logged in (token exists)
@@ -246,19 +288,11 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     const filterSelect = document.getElementById('filterDays');
     const sortSelect = document.getElementById('sortBy');
-    let expiringCustomers = await fetchExpiringPlans();
-    let notifiedCount = expiringCustomers.filter(c => c.notified).length;
-    console.log('Initial notified count:', notifiedCount);
 
-    function updateTable() {
-        const filteredAndSortedCustomers = filterAndSortCustomers(
-            expiringCustomers,
-            filterSelect.value,
-            sortSelect.value
-        );
-        renderExpiringPlansTable(filteredAndSortedCustomers);
-        updateDashboardCards(filteredAndSortedCustomers, notifiedCount);
-    }
+    // Fetch initial data
+    expiringCustomers = await fetchExpiringPlans();
+    notifiedCount = expiringCustomers.filter(c => c.notified).length;
+    console.log('Initial notified count:', notifiedCount);
 
     // Initial render
     updateTable();

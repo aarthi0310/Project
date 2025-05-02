@@ -18,7 +18,6 @@ async function fetchWithAuth(url, options = {}) {
     return fetch(url, options);
 }
 
-
 async function loadTickets() {
     try {
         const response = await fetchWithAuth('http://localhost:8081/api/support/tickets');
@@ -38,6 +37,7 @@ async function loadTickets() {
         updateDashboardStats();
     } catch (error) {
         console.error("Error loading tickets:", error);
+        showMessage(`Error loading tickets: ${error.message}`, 'error');
     }
 }
 
@@ -84,11 +84,6 @@ function renderTickets() {
                     ${ticket.status}
                 </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium ${getPriorityColor(ticket.priority)}">
-                    ${ticket.priority}
-                </div>
-            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm">
                 <button onclick="viewTicketDetails('${ticket.ticketId}')" class="text-blue-600 hover:text-blue-900 mr-3">
                     <i class="fas fa-eye"></i> View
@@ -107,9 +102,6 @@ function renderTickets() {
                         ${ticket.status}
                     </span>
                 </div>
-                <span class="text-xs font-medium ${getPriorityColor(ticket.priority)}">
-                    ${ticket.priority}
-                </span>
             </div>
             <div class="p-4">
                 <div class="flex items-center mb-3">
@@ -178,15 +170,6 @@ function getStatusStyle(status) {
     }
 }
 
-function getPriorityColor(priority) {
-    switch (priority) {
-        case 'High': return 'text-red-600';
-        case 'Medium': return 'text-yellow-600';
-        case 'Low': return 'text-green-600';
-        default: return 'text-gray-600';
-    }
-}
-
 async function viewTicketDetails(ticketId) {
     try {
         const response = await fetchWithAuth(`http://localhost:8081/api/support/ticket/${ticketId}`);
@@ -204,11 +187,9 @@ async function viewTicketDetails(ticketId) {
         if (ticket) {
             document.getElementById('modalTicketId').textContent = ticket.ticketId;
             document.getElementById('modalStatus').textContent = ticket.status;
-            document.getElementById('modalPriority').textContent = ticket.priority;
             document.getElementById('modalIssueType').textContent = ticket.issueTypeName;
             document.getElementById('modalSubmitted').textContent = formatDateTime(ticket.submittedDate);
             document.getElementById('modalUpdated').textContent = formatDateTime(ticket.lastUpdated);
-            document.getElementById('modalAssigned').textContent = ticket.assignedTo;
             document.getElementById('modalName').textContent = ticket.customerName;
             document.getElementById('modalMobile').textContent = ticket.mobile;
             document.getElementById('modalDescription').textContent = ticket.description;
@@ -222,10 +203,69 @@ async function viewTicketDetails(ticketId) {
                 communicationContainer.appendChild(messageDiv);
             });
 
+            // Reset reply form
+            const replyForm = document.getElementById('replyForm');
+            replyForm.reset();
+            replyForm.dataset.ticketId = ticket.ticketId; // Store ticketId in form
+
             document.getElementById('ticketModal').style.display = 'block';
         }
     } catch (error) {
         console.error("Error fetching ticket details:", error);
+        showMessage(`Error fetching ticket details: ${error.message}`, 'error');
+    }
+}
+
+async function sendReply(ticketId, replyMessage, sender) {
+    try {
+        const response = await fetchWithAuth('http://localhost:8081/api/support/reply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ticketId: ticketId,
+                replyMessage: replyMessage,
+                sender: sender
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Failed to send reply: ${response.status}`);
+        }
+
+        const updatedTicket = await response.json();
+        console.log("Reply sent and ticket updated:", updatedTicket);
+        showMessage('Reply sent successfully! Ticket has been closed.', 'success');
+
+        // Update communication history in modal
+        const communicationContainer = document.getElementById('modalCommunication');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'border p-2 rounded mb-2';
+        messageDiv.innerHTML = `<strong>${sender}:</strong> <span>${replyMessage}</span> <small class="text-gray-500">(${formatDateTime(updatedTicket.lastUpdated)})</small>`;
+        communicationContainer.appendChild(messageDiv);
+
+        // Update ticket status and last updated in modal
+        document.getElementById('modalStatus').textContent = updatedTicket.status;
+        document.getElementById('modalUpdated').textContent = formatDateTime(updatedTicket.lastUpdated);
+
+        // Update allTickets and filteredTickets
+        const ticketIndex = allTickets.findIndex(t => t.ticketId === ticketId);
+        if (ticketIndex !== -1) {
+            allTickets[ticketIndex] = updatedTicket;
+            const filteredIndex = filteredTickets.findIndex(t => t.ticketId === ticketId);
+            if (filteredIndex !== -1) {
+                filteredTickets[filteredIndex] = updatedTicket;
+            }
+            renderTickets();
+        }
+
+        // Clear reply form
+        document.getElementById('replyForm').reset();
+    } catch (error) {
+        console.error("Error sending reply:", error);
+        showMessage(`Error sending reply: ${error.message}`, 'error');
     }
 }
 
@@ -236,7 +276,6 @@ function closeTicketModal() {
 function applyFilters() {
     const searchTerm = document.getElementById('searchTickets').value.trim().toLowerCase();
     const statusFilter = document.getElementById('statusFilter').value;
-    const priorityFilter = document.getElementById('priorityFilter').value;
     const issueTypeFilter = document.getElementById('issueTypeFilter').value;
 
     filteredTickets = allTickets.filter(ticket => {
@@ -247,10 +286,9 @@ function applyFilters() {
             (ticket.description && ticket.description.toLowerCase().includes(searchTerm))
         );
         const matchesStatus = !statusFilter || ticket.status === statusFilter;
-        const matchesPriority = !priorityFilter || ticket.priority === priorityFilter;
         const matchesIssueType = !issueTypeFilter || ticket.issueType === issueTypeFilter;
 
-        return matchesSearch && matchesStatus && matchesPriority && matchesIssueType;
+        return matchesSearch && matchesStatus && matchesIssueType;
     });
 
     currentPage = 1; // Reset to first page
@@ -261,12 +299,23 @@ function applyFilters() {
 function resetFilters() {
     document.getElementById('searchTickets').value = '';
     document.getElementById('statusFilter').value = '';
-    document.getElementById('priorityFilter').value = '';
     document.getElementById('issueTypeFilter').value = '';
     filteredTickets = [...allTickets];
     currentPage = 1;
     renderTickets();
     updateDashboardStats();
+}
+
+function showMessage(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} shadow-lg z-50`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+        setTimeout(() => document.body.removeChild(toast), 500);
+    }, 3000);
 }
 
 // Event Listeners
@@ -321,6 +370,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Optional: Real-time search on input change
     document.getElementById('searchTickets').addEventListener('input', applyFilters);
+
+    // Reply form submission
+    document.getElementById('replyForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const ticketId = this.dataset.ticketId;
+        const replyMessage = document.getElementById('replyMessage').value.trim();
+        const sender = document.getElementById('sender').value.trim();
+
+        if (!replyMessage) {
+            showMessage('Reply message cannot be empty', 'error');
+            return;
+        }
+        if (!sender) {
+            showMessage('Sender name cannot be empty', 'error');
+            return;
+        }
+
+        await sendReply(ticketId, replyMessage, sender);
+    });
 
     loadTickets(); // Load tickets on page load
 });

@@ -146,7 +146,7 @@ function initiateRazorpayPayment() {
                         phoneNumber: verifyData.phoneNumber, // Use exact phone number from backend
                         planName: verifyData.planName,
                         amount: verifyData.amount,
-                        method: verifyData.method,
+                        method: verifyData.method, // This will now be Card, Netbanking, etc.
                         transactionId: verifyData.transactionId,
                         date: verifyData.date,
                         validity: verifyData.validity

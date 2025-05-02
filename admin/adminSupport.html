@@ -60,7 +60,7 @@
             <h1 class="text-xl md:text-2xl font-bold text-gray-800">Support Management</h1>
             <div class="hidden md:flex items-center">
                 <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    <i class="fas fa-sign-out-alt mr-2"></i> <a href="index.html">Logout</a>
+                    <i class="fas fa-sign-out-alt mr-2"></i> <a href="/index.html">Logout</a>
                 </button>
             </div>
         </div>
@@ -105,12 +105,6 @@
                             <option value="Resolved">Resolved</option>
                             <option value="Closed">Closed</option>
                         </select>
-                        <select id="priorityFilter" class="p-2 md:p-3 border border-gray-300 rounded-lg bg-white">
-                            <option value="">All Priority</option>
-                            <option value="High">High</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Low">Low</option>
-                        </select>
                         <select id="issueTypeFilter" class="p-2 md:p-3 border border-gray-300 rounded-lg bg-white">
                             <option value="">All Issue Types</option>
                             <option value="network">Network Issues</option>
@@ -150,7 +144,6 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Submitted</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
@@ -193,11 +186,9 @@
                     <div class="space-y-3">
                         <p><span class="font-medium">Ticket ID:</span> <span id="modalTicketId"></span></p>
                         <p><span class="font-medium">Status:</span> <span id="modalStatus"></span></p>
-                        <p><span class="font-medium">Priority:</span> <span id="modalPriority"></span></p>
                         <p><span class="font-medium">Issue Type:</span> <span id="modalIssueType"></span></p>
                         <p><span class="font-medium">Submitted:</span> <span id="modalSubmitted"></span></p>
                         <p><span class="font-medium">Last Updated:</span> <span id="modalUpdated"></span></p>
-                        <p><span class="font-medium">Assigned To:</span> <span id="modalAssigned"></span></p>
                     </div>
                 </div>
                 <div>
@@ -220,8 +211,27 @@
                     <!-- Communication history will be loaded here -->
                 </div>
             </div>
+
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-4 border-b pb-2">Send Reply</h3>
+                <form id="replyForm" class="space-y-4">
+                    <div>
+                        <label for="replyMessage" class="block text-sm font-medium text-gray-700">Reply Message</label>
+                        <textarea id="replyMessage" name="replyMessage" rows="4" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                    </div>
+                    <div>
+                        <label for="sender" class="block text-sm font-medium text-gray-700">Sender Name</label>
+                        <input type="text" id="sender" name="sender" class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="Admin" required>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="closeTicketModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Send Reply</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+
+    <script src="/scripts/adminSupport.js"></script>
 </body>
-<script src="/scripts/adminSupport.js"></script>
 </html>
